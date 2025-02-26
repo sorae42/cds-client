@@ -1,7 +1,11 @@
 @import 'tailwindcss';
-
-@source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
-
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/optional/presets';
 @import '@skeletonlabs/skeleton/themes/cerberus';
+
+@plugin '@tailwindcss/forms';
+@source '../node_modules/@skeletonlabs/skeleton-svelte';
+
+html, body {
+    @apply w-full h-full;
+}
