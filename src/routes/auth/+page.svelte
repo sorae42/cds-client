@@ -3,20 +3,13 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Info, Lock, Mail, TriangleAlertIcon, User } from 'lucide-svelte';
-	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
-	let { cancellable = true } = $props();
-	let openState = $state(false);
 	let message = $state('');
 	let success = $state(true);
 	let forgotPassword = $state(false);
 
 	const redirectTo = page.url.searchParams.get('redirectTo');
-
-	function closeModal() {
-		openState = false;
-	}
 
 	function switchDialog() {
 		forgotPassword = !forgotPassword;
@@ -45,9 +38,9 @@
 				return async ({ result, update }: { result: any; update: any }) => {
 					success = result.data.success;
 					message = result.data.message;
+					if (success && message.includes('REDIRECT'))
+						window.location.replace(result.data.location);
 					update();
-
-					if (success && redirectTo) goto(redirectTo);
 				};
 			}}
 		>
@@ -81,11 +74,6 @@
 					<div class="input-group w-full">
 						<button type="submit" class="btn preset-filled">Đăng nhập</button>
 					</div>
-					{#if cancellable}
-						<div class="input-group w-full">
-							<button type="button" class="btn preset-tonal" onclick={closeModal}>Huỷ</button>
-						</div>
-					{/if}
 					<div class="text-center mt-4">
 						<button type="button" class="underline" onclick={switchDialog}>Quên mật khẩu?</button>
 					</div>
