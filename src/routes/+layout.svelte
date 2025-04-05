@@ -23,14 +23,16 @@
 			</a>
 		{/if}
 	{/snippet}
-	<span>Đánh giá chuyển đổi số</span>
+	{#snippet lead()}
+		<h3 class="h3">Đánh giá chuyển đổi số</h3>
+	{/snippet}
 </AppBar>
 
 <div class="card border-surface-100-900 grid w-full h-full grid-cols-[auto_1fr] border-[1px]">
 	{#if page.url.pathname !== '/auth'}
 		<Navbar />
 	{/if}
-	<div class="pt-16">
+	<div class="pt-16 !bg-white">
 		{@render children()}
 	</div>
 </div>

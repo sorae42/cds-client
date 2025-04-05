@@ -1,8 +1,8 @@
 <script lang="ts">
-	const { children, action, id = 0 } = $props();
+	const { children, id = 0 } = $props();
 </script>
 
-<form {action} class="p-4">
+<form action={id === 0 ? '?/create' : '?/update'} method="POST" class="p-8">
 	<input type="hidden" name="id" value={id} />
 	{@render children()}
 	<div>

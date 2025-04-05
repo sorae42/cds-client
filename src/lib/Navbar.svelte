@@ -5,7 +5,7 @@
 
 <Navigation.Rail expanded={true}>
 	{#snippet tiles()}
-		<Navigation.Tile labelExpanded="Quản lý tài khoản" href="/account">
+		<Navigation.Tile labelExpanded="Quản lý tài khoản" href="/management/account">
 			<User />
 		</Navigation.Tile>
 	{/snippet}

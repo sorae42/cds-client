@@ -6,8 +6,8 @@
 </script>
 
 <div class="p-8">
-	<h2>Quản lý tài khoản</h2>
 	<CrudTable
+		headerText="Quản lý tài khoản"
 		data={data.data}
 		presentation={['ID', 'Username', 'Họ tên', 'Email', 'SDT']}
 		detailButton={false}

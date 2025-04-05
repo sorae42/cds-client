@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { Plus } from 'lucide-svelte';
+	import DeletePopup from './DeletePopup.svelte';
 	const {
+		headerText,
 		data,
 		presentation,
 		detailButton = true,
@@ -17,9 +20,12 @@
 	// 	}
 	// 	return true;
 	// });
-
-	console.log(data);
 </script>
+
+<div class="flex justify-between pb-6">
+	<h2>{headerText}</h2>
+	<a href="{page.url.pathname}/details/0/edit" class="btn preset-tonal-primary"><Plus /> Tạo mới</a>
+</div>
 
 <div class="table-wrap">
 	<table class="table caption-bottom">
@@ -49,7 +55,7 @@
 							>
 						{/if}
 						{#if deleteButton}
-							<button class="btn preset-filled-error-500">Xoá</button>
+							<DeletePopup id={sub.id} />
 						{/if}
 					</td>
 				</tr>
