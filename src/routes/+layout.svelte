@@ -1,16 +1,32 @@
 <script lang="ts">
 	import '../app.css';
-	import { AppBar } from '@skeletonlabs/skeleton-svelte';
+	import { AppBar, ToastProvider } from '@skeletonlabs/skeleton-svelte';
 	import Navbar from '$lib/Navbar.svelte';
-	import { LogIn, LogOut } from 'lucide-svelte';
+	import { LogIn, LogOut, Search } from 'lucide-svelte';
 	import type { LayoutProps } from './$types';
 	import { page } from '$app/state';
 
 	let { children, data }: LayoutProps = $props();
+
+	const routeThatHideNavbar = ['/auth', '/', '/search'];
+
+	let appbarTransparency = $state(true);
+	let scrollY = $state(0);
+
+	function checkScroll() {
+		if (scrollY < 42) appbarTransparency = true;
+		else appbarTransparency = false;
+	}
 </script>
 
-<AppBar classes="fixed">
+<AppBar classes="fixed {appbarTransparency ? 'bg-transparent' : ''} duration-300">
 	{#snippet trail()}
+		{#if page.url.pathname !== '/search'}
+			<a href="/search" class="btn preset-outlined px-10">
+				<Search />
+				<span>Tìm kiếm kết quả</span>
+			</a>
+		{/if}
 		{#if !data.token}
 			<a href="/auth" class="btn preset-filled">
 				<span>Đăng nhập</span>
@@ -24,15 +40,19 @@
 		{/if}
 	{/snippet}
 	{#snippet lead()}
-		<h3 class="h3">Đánh giá chuyển đổi số</h3>
+		<h4 class="h4"><a href="/" class="hover:!underline">Hệ thống đánh giá chuyển đổi số</a></h4>
 	{/snippet}
 </AppBar>
 
-<div class="card border-surface-100-900 grid w-full h-full grid-cols-[auto_1fr] border-[1px]">
-	{#if page.url.pathname !== '/auth'}
+<div class="border-surface-100-900 bg-white w-full h-full flex border-[1px]">
+	{#if !routeThatHideNavbar.includes(page.url.pathname)}
 		<Navbar />
 	{/if}
-	<div class="pt-16 !bg-white">
-		{@render children()}
+	<div class="{page.url.pathname === '/' ? '' : 'pt-16'} !bg-white w-full">
+		<ToastProvider>
+			{@render children()}
+		</ToastProvider>
 	</div>
 </div>
+
+<svelte:window bind:scrollY on:scroll={checkScroll} />
