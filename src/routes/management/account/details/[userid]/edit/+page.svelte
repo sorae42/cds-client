@@ -2,17 +2,9 @@
 	import Form from '$lib/crud/Form.svelte';
 	import TextInput from '$lib/crud/TextInput.svelte';
 	import type { PageProps } from './$types';
+	import type { User } from '$lib/types/User';
 
 	const { data }: PageProps = $props();
-
-	interface User {
-		id: number;
-		username: string;
-		fullName?: string;
-		email?: string;
-		phone: string;
-	}
-
 	const user: User = data.data;
 </script>
 
