@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Plus } from 'lucide-svelte';
+	import { Info, Pencil } from 'lucide-svelte';
 	import DeletePopup from './DeletePopup.svelte';
 	const {
-		headerText,
 		data,
 		presentation,
 		detailButton = true,
@@ -11,21 +10,15 @@
 		deleteButton = true
 	} = $props();
 
-	// make a copy for display then remove id from data
-	// display.filter((obj: any) => {
-	// 	for (let key in obj) {
-	// 		if (key === 'id') {
-	// 			delete obj[key];
-	// 		}
-	// 	}
-	// 	return true;
-	// });
+	// make a copy for display then replace id with counter numbers
+	let display = data;
+	let counter = 0;
+	display.filter((obj: any) => {
+		counter++;
+		obj.id = counter;
+		return obj;
+	});
 </script>
-
-<div class="flex justify-between pb-6">
-	<h2>{headerText}</h2>
-	<a href="{page.url.pathname}/details/0/edit" class="btn preset-tonal-primary"><Plus /> Tạo mới</a>
-</div>
 
 <div class="table-wrap">
 	<table class="table caption-bottom">
@@ -44,19 +37,21 @@
 						<td>{value}</td>
 					{/each}
 					<!-- Action buttons -->
-					<td class="!text-right">
+					<td class="!text-right flex flex-col gap-2">
 						{#if detailButton}
-							<a class="btn preset-filled" href="{page.url.pathname}/details/{sub.id}">Chi tiết</a>
+							<a class="btn preset-filled" href="{page.url.pathname}/details/{sub.id}"><Info /></a>
 						{/if}
-						{#if updateButton}
-							<a
-								class="btn preset-filled-primary-500"
-								href="{page.url.pathname}/details/{sub.id}/edit">Sửa</a
-							>
-						{/if}
-						{#if deleteButton}
-							<DeletePopup id={sub.id} />
-						{/if}
+						<span class="flex gap-2 justify-end">
+							{#if updateButton}
+								<a
+									class="btn preset-filled-primary-500"
+									href="{page.url.pathname}/details/{sub.id}/edit"><Pencil /></a
+								>
+							{/if}
+							{#if deleteButton}
+								<DeletePopup id={sub.id} />
+							{/if}
+						</span>
 					</td>
 				</tr>
 			{/each}

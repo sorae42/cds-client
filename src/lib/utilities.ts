@@ -4,29 +4,30 @@ export async function streamJson(stream: ReadableStream<Uint8Array> | null) {
     if (stream == null) return { done: false, data: null };
     const decoder = new TextDecoder('utf-8');
     const b = await stream.getReader().read();
-    const json = JSON.parse(decoder.decode(b.value));
+    const c = decoder.decode(b.value);
+    let json: any;
+    try {
+        json = JSON.parse(c);
+    } catch (e) {
+        json = JSON.parse("{}");
+        console.error("Error attempting to decode data: ", e);
+        console.error("Data dump at b: ", b);
+        console.error("Data dump at c: ", c);
+    }
     return { done: b.done, data: json };
-}
-
-async function streamerTest(stream: ReadableStream<Uint8Array> | null) {
-    if (stream == null) return { done: false, data: null };
-    const decoder = new TextDecoder('utf-8');
-    const b = await stream.getReader().read();
-    return decoder.decode(b.value);
-
 }
 
 export interface Submission {
     method: string,
     endpoint: string,
     cookies: Cookies,
-    form?: URLSearchParams | FormData,
+    form?: URLSearchParams | Object,
+    formType?: string,
     unauthorizedPath?: string
 }
 
 export async function submission(dataSubmission: Submission) {
     const headers: Headers = new Headers();
-    headers.append('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 
     const formData: RequestInit = { method: dataSubmission.method }
 
@@ -39,17 +40,30 @@ export async function submission(dataSubmission: Submission) {
 
     formData.headers = headers;
 
-    if (dataSubmission.form) formData.body = dataSubmission.form.toString();
+
+    if (dataSubmission.form) {
+        switch (dataSubmission.formType) {
+            case 'url':
+                headers.append('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+                formData.body = dataSubmission.form.toString();
+                break;
+            case 'obj':
+                headers.append('Content-Type', 'application/json; charset=UTF-8');
+                formData.body = JSON.stringify(dataSubmission.form);
+                break;
+        }
+    }
 
     const data = await fetch("http://localhost:5157/api" + dataSubmission.endpoint, formData);
+    console.log(`${data.status} ${dataSubmission.method} ${dataSubmission.endpoint}`);
 
     if (!data.url.includes("/api/auths") && data.status === 401) {
-        console.log("response on error: ", data)
         dataSubmission.cookies.set("vn.CDS.RedirectTo", dataSubmission.unauthorizedPath || "/", { path: '/' })
+        dataSubmission.cookies.delete('vn.CDS.AuthToken', { path: '/' });
         redirect(307, "/auth?redirectTo=" + dataSubmission.unauthorizedPath);
     }
 
-    var a = await streamJson(data.body);
+    const a = await streamJson(data.body);
 
     return {
         ok: data.ok,
