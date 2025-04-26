@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 
 	let { data }: PageProps = $props();
+	console.log(data.data);
 </script>
 
 <div class="p-8">
@@ -12,7 +13,7 @@
 		<a href="{page.url.pathname}/details/0/edit" class="btn preset-tonal-primary"
 			><Plus /> Tạo người dùng mới</a
 		>
-		<div class="input-group grid-cols-[auto_1fr_auto] w-100">
+		<div class="input-group grid-cols-[auto_1fr_auto] w-100 hidden">
 			<div class="ig-cell preset-tonal">
 				<Search size={16} />
 			</div>
@@ -23,6 +24,7 @@
 	<CrudTable
 		data={data.data}
 		presentation={['Username', 'Họ tên', 'Email', 'SDT']}
+		dataBody={['username', 'fullName', 'email', 'phone']}
 		detailButton={false}
 	/>
 </div>

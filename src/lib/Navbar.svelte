@@ -18,13 +18,8 @@
 		<Navigation.Tile labelExpanded="Đánh giá" href="#" id="#">
 			<Star />
 		</Navigation.Tile>
-
 		{#if isAdmin}
 			<hr class="bg-black w-full" />
-			<Navigation.Tile labelExpanded="Quản lý đơn vị" href="/management/area" id="/management/area">
-				<LandPlot />
-			</Navigation.Tile>
-
 			<Navigation.Tile
 				labelExpanded="Quản lý tài khoản"
 				href="/management/account"
@@ -32,6 +27,10 @@
 			>
 				<User />
 			</Navigation.Tile>
+			<Navigation.Tile labelExpanded="Quản lý đơn vị" href="/management/unit" id="/management/unit">
+				<LandPlot />
+			</Navigation.Tile>
+
 			<Navigation.Tile
 				labelExpanded="Quản lý tiêu chí"
 				href="/management/criterias"

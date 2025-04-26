@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms';
-	import { Pencil, Plus, SquareChevronDown, SquareChevronUp, Trash } from 'lucide-svelte';
+	import { Plus, SquareChevronDown, SquareChevronUp } from 'lucide-svelte';
 	import type { PageProps } from './$types';
 	import { page } from '$app/state';
-	import { Accordion, Modal, Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import { Accordion, Modal } from '@skeletonlabs/skeleton-svelte';
 	import TextInput from '$lib/crud/TextInput.svelte';
 	import CrudTable from '$lib/CRUDTable.svelte';
 
@@ -12,7 +12,6 @@
 	let selectBox: any = $state();
 	let previousValue: number = $state(Number(page.url.searchParams.get('group')) || 1);
 	let openAddGroup: boolean = $state(false);
-	let openHover1: boolean = $state(false);
 
 	function submit() {
 		if (selectBox == 0) {
@@ -22,8 +21,6 @@
 		}
 		targetGroup.submit();
 	}
-
-	console.log(data.groupDetails);
 </script>
 
 <div class="p-8 flex justify-between">
@@ -91,7 +88,7 @@
 			{#snippet panel()}
 				<CrudTable
 					data={data.criterias[index].subCriterias}
-					presentation={['#', 'Tiêu chí', 'Tổng điểm', 'Minh chứng']}
+					presentation={['Tiêu chí', 'Tổng điểm', 'Minh chứng']}
 					updateButton={false}
 					deleteButton={false}
 				/>
@@ -111,8 +108,12 @@
 		<form
 			action="?/newTargetGroup"
 			use:enhance={() => {
+				console.log('whoe!');
 				return async ({ result }) => {
-					if (result.type === 'success') openAddGroup = false;
+					console.log(result);
+					if (result.type === 'success') {
+						openAddGroup = false;
+					}
 				};
 			}}
 			method="POST"

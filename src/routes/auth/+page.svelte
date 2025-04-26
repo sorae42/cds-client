@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Info, Lock, Mail, TriangleAlertIcon, User } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';

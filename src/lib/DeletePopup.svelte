@@ -7,7 +7,6 @@
 	const { id } = $props();
 
 	let openState = $state(false);
-	let disabled = $state(true);
 
 	function popoverClose() {
 		openState = false;
@@ -17,10 +16,6 @@
 		popoverClose();
 		goto(`${page.url.pathname}/details/${id}/delete`);
 	}
-
-	setTimeout(() => {
-		disabled = false;
-	}, 1000);
 </script>
 
 <Popover
@@ -33,7 +28,7 @@
 	arrowBackground="!bg-white"
 	ids={{ content: id }}
 >
-	{#snippet trigger()}<Trash />{/snippet}
+	{#snippet trigger()}<Trash /> Xoá{/snippet}
 	{#snippet content()}
 		<header class="flex justify-center">
 			<p class="font-bold text-2xl">Xoá thông tin này?</p>
@@ -46,7 +41,6 @@
 				type="button"
 				class="btn preset-filled-error-500 hover:preset-tonal"
 				onclick={confimation}
-				{disabled}
 			>
 				Xoá thông tin
 			</button>

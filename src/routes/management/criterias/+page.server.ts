@@ -26,10 +26,7 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
 export const actions = {
     targetGroupChange: async ({ request }) => {
         const data = await request.formData();
-        let form = new URLSearchParams();
         let id = data.get('target-group')?.toString() || '';
-
-        console.log(form);
         return redirect(303, '?group=' + id);
     },
 
@@ -41,7 +38,8 @@ export const actions = {
 
         const result = await submission({ method: 'POST', endpoint: '/targetgroups/create', cookies, form, formType: 'obj', unauthorizedPath: url.pathname })
         console.log(result);
-        if (!result.ok) return fail(result.data.status, { targetGroup })
+
+        if (!result.ok) return fail(result.data.status, { targetGroup });
 
         return { success: true }
     }

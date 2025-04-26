@@ -18,7 +18,7 @@ export const actions = {
             return { success: false, message: result.data.message };
         }
 
-        const redirectTo = cookies.get("vn.CDS.RedirectTo") || "/";
+        const redirectTo = cookies.get("vn.CDS.RedirectTo") || "/criterias";
         return {
             success: true,
             message: 'REDIRECT',

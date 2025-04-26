@@ -1,17 +1,22 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Info, Pencil } from 'lucide-svelte';
+	import { SquareChevronDown, SquareChevronUp, Info, Pencil } from 'lucide-svelte';
 	import DeletePopup from './DeletePopup.svelte';
+	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	const {
 		data,
 		presentation,
+		dataBody,
 		detailButton = true,
 		updateButton = true,
 		deleteButton = true
 	} = $props();
 
+	console.log(presentation, dataBody);
+
 	// make a copy for display then replace id with counter numbers
 	let display = data;
+
 	let counter = 0;
 	display.filter((obj: any) => {
 		counter++;
@@ -20,41 +25,65 @@
 	});
 </script>
 
-<div class="table-wrap">
-	<table class="table caption-bottom">
-		<thead>
-			<tr>
-				{#each presentation as text}
-					<th>{text}</th>
-				{/each}
-				<th class="!text-right">Thao tác</th>
-			</tr>
-		</thead>
-		<tbody class="[&>tr]:hover:preset-tonal-primary">
-			{#each data as sub}
-				<tr>
-					{#each Object.entries(sub) as [key, value]}
-						<td>{value}</td>
-					{/each}
-					<!-- Action buttons -->
-					<td class="!text-right flex flex-col gap-2">
-						{#if detailButton}
-							<a class="btn preset-filled" href="{page.url.pathname}/details/{sub.id}"><Info /></a>
-						{/if}
-						<span class="flex gap-2 justify-end">
-							{#if updateButton}
-								<a
-									class="btn preset-filled-primary-500"
-									href="{page.url.pathname}/details/{sub.id}/edit"><Pencil /></a
-								>
-							{/if}
-							{#if deleteButton}
-								<DeletePopup id={sub.id} />
-							{/if}
-						</span>
-					</td>
-				</tr>
-			{/each}
-		</tbody>
-	</table>
+<div class="d-head px-4 py-1" style="--length:{presentation.length}">
+	<span>#</span>
+	{#each presentation as text}
+		<span>{text}</span>
+	{/each}
+	<span></span>
 </div>
+<hr />
+<Accordion multiple collapsible>
+	{#snippet iconOpen()}
+		<SquareChevronUp />
+	{/snippet}
+	{#snippet iconClosed()}
+		<SquareChevronDown />
+	{/snippet}
+	{#each data as sub}
+		<Accordion.Item value={sub.id} headingElement="span">
+			{#snippet control()}
+				<div class="d-content" style="--length:{presentation.length}">
+					{#each Object.entries(sub) as [key, value]}
+						<span class="w-fit">{value}</span>
+					{/each}
+				</div>
+			{/snippet}
+			{#snippet panel()}
+				<div></div>
+				<div class="!text-right flex gap-2 justify-end">
+					{#if detailButton}
+						<a class="btn preset-filled" href="{page.url.pathname}/details/{sub.id}"
+							><Info />Chi tiết</a
+						>
+					{/if}
+					{#if updateButton}
+						<a
+							class="btn preset-filled-primary-500"
+							href="{page.url.pathname}/details/{sub.id}/edit"><Pencil />Chỉnh sửa</a
+						>
+					{/if}
+					{#if deleteButton}
+						<DeletePopup id={sub.id} />
+					{/if}
+				</div>
+			{/snippet}
+		</Accordion.Item>
+		<hr />
+	{/each}
+</Accordion>
+
+<style>
+	.d-head {
+		display: grid;
+		justify-content: space-between;
+		font-weight: bold;
+		grid-template-columns: 24px repeat(var(--length), 1fr) 2.5em;
+	}
+
+	.d-content {
+		display: grid;
+		justify-content: space-between;
+		grid-template-columns: 24px repeat(var(--length), 1fr);
+	}
+</style>

@@ -14,6 +14,8 @@
 	let openAddGroup: boolean = $state(false);
 	let openHover1: boolean = $state(false);
 
+	let groups: Array<any> = $state(data.targetGroup);
+
 	function submit() {
 		if (selectBox == 0) {
 			openAddGroup = true;
@@ -22,8 +24,6 @@
 		}
 		targetGroup.submit();
 	}
-
-	console.log(data.groupDetails);
 </script>
 
 <div class="p-8 flex justify-between">
@@ -46,7 +46,7 @@
 				bind:value={selectBox}
 				class="ig-select"
 			>
-				{#each data.targetGroup as targets}
+				{#each groups as targets}
 					<option value={targets.id} selected={targets.id == data.groupDetails.id ? true : false}
 						>{targets.name}</option
 					>
@@ -123,7 +123,7 @@
 				</div>
 				<CrudTable
 					data={data.criterias[index].subCriterias}
-					presentation={['#', 'Tiêu chí', 'Tổng điểm', 'Minh chứng']}
+					presentation={['Tiêu chí', 'Tổng điểm', 'Minh chứng']}
 				/>
 			{/snippet}
 		</Accordion.Item>

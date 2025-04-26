@@ -21,7 +21,7 @@ export interface Submission {
     method: string,
     endpoint: string,
     cookies: Cookies,
-    form?: URLSearchParams | Object,
+    form?: URLSearchParams,
     formType?: string,
     unauthorizedPath?: string
 }
@@ -40,7 +40,6 @@ export async function submission(dataSubmission: Submission) {
 
     formData.headers = headers;
 
-
     if (dataSubmission.form) {
         switch (dataSubmission.formType) {
             case 'url':
@@ -49,7 +48,7 @@ export async function submission(dataSubmission: Submission) {
                 break;
             case 'obj':
                 headers.append('Content-Type', 'application/json; charset=UTF-8');
-                formData.body = JSON.stringify(dataSubmission.form);
+                formData.body = JSON.stringify(groupParamsByKey(dataSubmission.form));
                 break;
         }
     }
@@ -70,3 +69,18 @@ export async function submission(dataSubmission: Submission) {
         ...a
     };
 }
+
+const groupParamsByKey = (params: URLSearchParams) => [...params.entries()].reduce((acc: any, tuple: any) => {
+    const [key, val] = tuple;
+    if (acc.hasOwnProperty(key)) {
+        if (Array.isArray(acc[key])) {
+            acc[key] = [...acc[key], val]
+        } else {
+            acc[key] = [acc[key], val];
+        }
+    } else {
+        acc[key] = val;
+    }
+
+    return acc;
+}, {});
