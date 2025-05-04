@@ -88,7 +88,10 @@
 			{#snippet panel()}
 				<CrudTable
 					data={data.criterias[index].subCriterias}
-					presentation={['Tiêu chí', 'Tổng điểm', 'Minh chứng']}
+					presentation={['Tiêu chí', 'Tổng điểm']}
+					dataBody={['name', 'maxScore']}
+					presentationSub={['Minh chứng']}
+					dataSub={['evidenceInfo']}
 					updateButton={false}
 					deleteButton={false}
 				/>

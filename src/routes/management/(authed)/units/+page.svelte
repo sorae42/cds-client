@@ -5,14 +5,15 @@
 	import { page } from '$app/state';
 
 	let { data }: PageProps = $props();
+	console.log(data.data);
 </script>
 
 <div class="p-8">
 	<div class="flex justify-between pb-6">
 		<a href="{page.url.pathname}/details/0/edit" class="btn preset-tonal-primary"
-			><Plus /> Tạo người dùng mới</a
+			><Plus /> Tạo đơn vị mới</a
 		>
-		<div class="input-group grid-cols-[auto_1fr_auto] w-100">
+		<div class="input-group grid-cols-[auto_1fr_auto] w-100 hidden">
 			<div class="ig-cell preset-tonal">
 				<Search size={16} />
 			</div>
@@ -22,7 +23,9 @@
 	</div>
 	<CrudTable
 		data={data.data}
-		presentation={['Username', 'Họ tên', 'Email', 'SDT']}
-		detailButton={false}
+		presentation={['Mã', 'Tên', 'Loại']}
+		dataBody={['code', 'name', 'type']}
+		presentationSub={['Địa chỉ', 'Mô tả']}
+		dataSub={['address', 'description']}
 	/>
 </div>

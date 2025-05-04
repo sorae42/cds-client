@@ -3,26 +3,24 @@
 	import { SquareChevronDown, SquareChevronUp, Info, Pencil } from 'lucide-svelte';
 	import DeletePopup from './DeletePopup.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
+	
 	const {
 		data,
 		presentation,
-		dataBody,
+		presentationSub = [],
+		dataBody = [],
+		dataSub = [],
 		detailButton = true,
 		updateButton = true,
 		deleteButton = true
 	} = $props();
 
-	console.log(presentation, dataBody);
-
-	// make a copy for display then replace id with counter numbers
-	let display = data;
-
-	let counter = 0;
-	display.filter((obj: any) => {
-		counter++;
-		obj.id = counter;
-		return obj;
-	});
+	// Safely transform data without using structuredClone
+	let display = data.map((obj: any) => ({
+		id: obj.id,
+		body: Object.fromEntries(dataBody.map((k) => [k, obj[k]])),
+		sub: Object.fromEntries(dataSub.map((k) => [k, obj[k]]))
+	}));
 </script>
 
 <div class="d-head px-4 py-1" style="--length:{presentation.length}">
@@ -40,31 +38,38 @@
 	{#snippet iconClosed()}
 		<SquareChevronDown />
 	{/snippet}
-	{#each data as sub}
-		<Accordion.Item value={sub.id} headingElement="span">
+	{#each display as entry}
+		<Accordion.Item value={entry.id} headingElement="span">
 			{#snippet control()}
 				<div class="d-content" style="--length:{presentation.length}">
-					{#each Object.entries(sub) as [key, value]}
+					<span class="w-fit">{entry.id}</span>
+					{#each Object.values(entry.body) as value}
 						<span class="w-fit">{value}</span>
 					{/each}
 				</div>
 			{/snippet}
 			{#snippet panel()}
-				<div></div>
+				<div>
+					{#each presentationSub as label, i}
+						<div>
+							<strong>{label}</strong>: {entry.sub[Object.keys(entry.sub)[i]] || 'Chưa cung cấp'}
+						</div>
+					{/each}
+				</div>
 				<div class="!text-right flex gap-2 justify-end">
 					{#if detailButton}
-						<a class="btn preset-filled" href="{page.url.pathname}/details/{sub.id}"
+						<a class="btn preset-filled" href="{page.url.pathname}/details/{entry.id}"
 							><Info />Chi tiết</a
 						>
 					{/if}
 					{#if updateButton}
 						<a
 							class="btn preset-filled-primary-500"
-							href="{page.url.pathname}/details/{sub.id}/edit"><Pencil />Chỉnh sửa</a
+							href="{page.url.pathname}/details/{entry.id}/edit"><Pencil />Chỉnh sửa</a
 						>
 					{/if}
 					{#if deleteButton}
-						<DeletePopup id={sub.id} />
+						<DeletePopup id={entry.id} />
 					{/if}
 				</div>
 			{/snippet}
@@ -79,11 +84,13 @@
 		justify-content: space-between;
 		font-weight: bold;
 		grid-template-columns: 24px repeat(var(--length), 1fr) 2.5em;
+		gap: 9px;
 	}
 
 	.d-content {
 		display: grid;
 		justify-content: space-between;
 		grid-template-columns: 24px repeat(var(--length), 1fr);
+		gap: 8px;
 	}
 </style>

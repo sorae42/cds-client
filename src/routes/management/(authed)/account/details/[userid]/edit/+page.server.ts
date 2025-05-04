@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ url, params, cookies }) => {
 export const actions = {
     create: async ({ url, request, cookies }) => {
         const data = await request.formData();
-        let form: User = { username: "", phone: "" };
+        let form: User = { username: "", phone: "", role: "user" };
 
         form.username = data.get('username')?.toString() || '';
         form.fullName = data.get('fullname')?.toString() || '';
@@ -41,7 +41,7 @@ export const actions = {
     },
     update: async ({ url, request, cookies }) => {
         const data = await request.formData();
-        let form: User = { username: "", phone: "" };
+        let form: User = { username: "", phone: "", role: "user" };
 
         form.id = Number(data.get('id')?.toString()) || 0;
         form.username = data.get('username')?.toString() || '';

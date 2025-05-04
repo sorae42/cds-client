@@ -8,9 +8,9 @@ export async function streamJson(stream: ReadableStream<Uint8Array> | null) {
     let json: any;
     try {
         json = JSON.parse(c);
-    } catch (e) {
+    } catch (e: any) {
         json = JSON.parse("{}");
-        console.error("Error attempting to decode data: ", e);
+        console.error("Error attempting to decode data: ", e instanceof Error ? e.message : String(e));
         console.error("Data dump at b: ", b);
         console.error("Data dump at c: ", c);
     }
@@ -21,66 +21,89 @@ export interface Submission {
     method: string,
     endpoint: string,
     cookies: Cookies,
-    form?: URLSearchParams,
+    form?: any,
     formType?: string,
     unauthorizedPath?: string
 }
 
-export async function submission(dataSubmission: Submission) {
-    const headers: Headers = new Headers();
+const groupParamsByKey = (params: URLSearchParams) => [...params.entries()].reduce((acc: Record<string, any>, [key, val]) => {
+    if (acc.hasOwnProperty(key)) {
+        acc[key] = Array.isArray(acc[key]) ? [...acc[key], val] : [acc[key], val];
+    } else {
+        acc[key] = val;
+    }
+    return acc;
+}, {});
 
-    const formData: RequestInit = { method: dataSubmission.method }
+export async function submission(dataSubmission: Submission) {
+    const headers = new Headers();
+    const formData: RequestInit = { 
+        method: dataSubmission.method,
+        credentials: 'include'
+    };
 
     const token = dataSubmission.cookies.get("vn.CDS.AuthToken");
+    if (token) {
+        headers.append('Authorization', `Bearer ${token}`);
+    }
 
-    if (token !== "") {
-        formData.credentials = 'include';
-        headers.append('Authorization', 'Bearer ' + token);
+    if (dataSubmission.form) {
+        try {
+            switch (dataSubmission.formType) {
+                case 'url': {
+                    headers.append('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+                    const params = dataSubmission.form instanceof URLSearchParams 
+                        ? dataSubmission.form 
+                        : new URLSearchParams(dataSubmission.form);
+                    formData.body = params.toString();
+                    break;
+                }
+                case 'obj':
+                default: {
+                    headers.append('Content-Type', 'application/json; charset=UTF-8');
+                    if (dataSubmission.form instanceof URLSearchParams) {
+                        // Convert URLSearchParams to properly grouped object
+                        formData.body = JSON.stringify(groupParamsByKey(dataSubmission.form));
+                    } else if (typeof dataSubmission.form === 'string') {
+                        formData.body = dataSubmission.form;
+                    } else {
+                        formData.body = JSON.stringify(dataSubmission.form);
+                    }
+                    break;
+                }
+            }
+        } catch (error) {
+            console.error('Form data processing error:', error, dataSubmission.form);
+            throw new Error('Failed to process form data');
+        }
     }
 
     formData.headers = headers;
 
-    if (dataSubmission.form) {
-        switch (dataSubmission.formType) {
-            case 'url':
-                headers.append('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-                formData.body = dataSubmission.form.toString();
-                break;
-            case 'obj':
-                headers.append('Content-Type', 'application/json; charset=UTF-8');
-                formData.body = JSON.stringify(groupParamsByKey(dataSubmission.form));
-                break;
+    try {
+        console.debug(`${dataSubmission.method} ${dataSubmission.endpoint}`);
+
+        const data = await fetch("http://localhost:5157/api" + dataSubmission.endpoint, formData);
+        
+        if (!data.url.includes("/api/auths") && data.status === 401) {
+            dataSubmission.cookies.set("vn.CDS.RedirectTo", dataSubmission.unauthorizedPath || "/", { path: '/' })
+            dataSubmission.cookies.delete('vn.CDS.AuthToken', { path: '/' });
+            redirect(307, "/auth?redirectTo=" + dataSubmission.unauthorizedPath);
         }
+
+        const response = await streamJson(data.body);
+
+        if (!data.ok && data.status !== 401) {
+            console.error(`Error ${data.status}: ${dataSubmission.endpoint}`);
+        }
+
+        return {
+            ok: data.ok,
+            ...response
+        };
+
+    } catch (error) {
+        console.error(`Request failed: ${dataSubmission.endpoint}`);
+        throw error;
     }
-
-    const data = await fetch("http://localhost:5157/api" + dataSubmission.endpoint, formData);
-    console.log(`${data.status} ${dataSubmission.method} ${dataSubmission.endpoint}`);
-
-    if (!data.url.includes("/api/auths") && data.status === 401) {
-        dataSubmission.cookies.set("vn.CDS.RedirectTo", dataSubmission.unauthorizedPath || "/", { path: '/' })
-        dataSubmission.cookies.delete('vn.CDS.AuthToken', { path: '/' });
-        redirect(307, "/auth?redirectTo=" + dataSubmission.unauthorizedPath);
-    }
-
-    const a = await streamJson(data.body);
-
-    return {
-        ok: data.ok,
-        ...a
-    };
 }
-
-const groupParamsByKey = (params: URLSearchParams) => [...params.entries()].reduce((acc: any, tuple: any) => {
-    const [key, val] = tuple;
-    if (acc.hasOwnProperty(key)) {
-        if (Array.isArray(acc[key])) {
-            acc[key] = [...acc[key], val]
-        } else {
-            acc[key] = [acc[key], val];
-        }
-    } else {
-        acc[key] = val;
-    }
-
-    return acc;
-}, {});

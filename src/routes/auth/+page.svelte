@@ -73,9 +73,9 @@
 					<div class="input-group w-full">
 						<button type="submit" class="btn preset-filled">Đăng nhập</button>
 					</div>
-					<div class="text-center mt-4">
+					<!-- <div class="text-center mt-4">
 						<button type="button" class="underline" onclick={switchDialog}>Quên mật khẩu?</button>
-					</div>
+					</div> -->
 				</div>
 			{:else}
 				<div transition:slide>
