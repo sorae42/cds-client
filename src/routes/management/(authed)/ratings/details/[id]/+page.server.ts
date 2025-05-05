@@ -37,13 +37,13 @@ export const actions = {
         const existingIds = JSON.parse(data.get('existingIds')?.toString() || '[]');
         
         const form = new URLSearchParams();
-        form.append('unitIds', JSON.stringify([...new Set([...existingIds, ...unitIds])]));
-
+        const combinedIds = [...new Set([...existingIds, ...unitIds])];
+        
         const result = await submission({
             method: 'PUT',
             endpoint: `/evaluationperiods/${params.id}`,
             cookies,
-            form,
+            form: { unitIds: combinedIds },
             formType: 'obj'
         });
 
@@ -55,15 +55,14 @@ export const actions = {
         const data = await request.formData();
         const criteriaIds = data.getAll('criteriaIds[]').map(id => Number(id));
         const existingIds = JSON.parse(data.get('existingIds')?.toString() || '[]');
-
-        const form = new URLSearchParams();
-        form.append('parentCriteriaIds', JSON.stringify([...new Set([...existingIds, ...criteriaIds])]));
+        
+        const combinedIds = [...new Set([...existingIds, ...criteriaIds])];
 
         const result = await submission({
             method: 'PUT',
             endpoint: `/evaluationperiods/${params.id}`,
             cookies,
-            form,
+            form: { parentCriteriaIds: combinedIds },
             formType: 'obj'
         });
 

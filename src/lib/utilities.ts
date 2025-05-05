@@ -63,15 +63,26 @@ export async function submission(dataSubmission: Submission) {
                     headers.append('Content-Type', 'application/json; charset=UTF-8');
                     if (dataSubmission.form instanceof URLSearchParams) {
                         // Convert URLSearchParams to properly grouped object
-                        formData.body = JSON.stringify(groupParamsByKey(dataSubmission.form));
-                    } else if (typeof dataSubmission.form === 'string') {
-                        formData.body = dataSubmission.form;
+                        const grouped = groupParamsByKey(dataSubmission.form);
+                        // Handle arrays by parsing string representations
+                        Object.keys(grouped).forEach(key => {
+                            if (typeof grouped[key] === 'string' && grouped[key].startsWith('[')) {
+                                try {
+                                    grouped[key] = JSON.parse(grouped[key]);
+                                } catch (e) {
+                                    console.error('Failed to parse array:', e);
+                                }
+                            }
+                        });
+                        formData.body = JSON.stringify(grouped);
                     } else {
                         formData.body = JSON.stringify(dataSubmission.form);
                     }
                     break;
                 }
             }
+
+            console.debug(formData.body);
         } catch (error) {
             console.error('Form data processing error:', error, dataSubmission.form);
             throw new Error('Failed to process form data');

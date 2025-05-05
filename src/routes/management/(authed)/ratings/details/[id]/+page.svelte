@@ -109,17 +109,7 @@
 	backdropClasses="backdrop-blur-sm"
 >
 	{#snippet content()}
-		<form
-			action="?/updateUnits"
-			method="POST"
-			use:enhance={() => {
-				return async ({ result }) => {
-					if (result.type === 'success') {
-						openAddUnits = false;
-					}
-				};
-			}}
-		>
+		<form action="?/updateUnits" method="POST">
 			<article class="space-y-4">
 				<h3 class="h3">Thêm đơn vị</h3>
 				{#each data.availableUnits as unit}
@@ -155,17 +145,7 @@
 	backdropClasses="backdrop-blur-sm"
 >
 	{#snippet content()}
-		<form
-			action="?/updateCriterias"
-			method="POST"
-			use:enhance={() => {
-				return async ({ result }) => {
-					if (result.type === 'success') {
-						openAddCriterias = false;
-					}
-				};
-			}}
-		>
+		<form action="?/updateCriterias" method="POST">
 			<article class="space-y-4">
 				<h3 class="h3">Thêm tiêu chí</h3>
 				{#each data.availableCriterias as criteria}
