@@ -27,6 +27,30 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 
                 if (userResult.ok) {
                     user = userResult.data;
+
+                    // Fetch review councils to determine if user is a chairman
+                    const reviewCouncilsResult = await submission({
+                        method: 'GET',
+                        endpoint: '/reviewcouncil/',
+                        cookies,
+                        unauthorizedPath: '/'
+                    });
+
+                    if (reviewCouncilsResult.ok && user) {
+                        const reviewCouncils = reviewCouncilsResult.data;
+
+                        // Check if the user is a chairman of any review council
+                        const isChair = reviewCouncils.some((council: any) =>
+                            council.chair && council.chair.id === user?.id
+                        );
+
+                        if (isChair) {
+                            user.isChairman = true;
+                        }
+                        else {
+                            user.isChairman = false;
+                        }
+                    }
                 }
             }
         } catch (error) {
@@ -35,8 +59,8 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
         }
     }
 
-    return { 
+    return {
         token,
-        user 
+        user
     };
 };

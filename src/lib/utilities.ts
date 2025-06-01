@@ -22,7 +22,7 @@ export interface Submission {
     endpoint: string,
     cookies: Cookies,
     form?: any,
-    formType?: string,
+    formType?: 'url' | 'obj' | 'raw', // update type definition
     unauthorizedPath?: string
 }
 
@@ -50,6 +50,11 @@ export async function submission(dataSubmission: Submission) {
     if (dataSubmission.form) {
         try {
             switch (dataSubmission.formType) {
+                case 'raw': {
+                    headers.append('Content-Type', 'application/json; charset=UTF-8');
+                    formData.body = dataSubmission.form.toString();
+                    break;
+                }
                 case 'url': {
                     headers.append('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
                     const params = dataSubmission.form instanceof URLSearchParams 

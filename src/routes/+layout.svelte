@@ -66,7 +66,7 @@
 				{/snippet}
 				{#snippet content()}
 					<div class="flex flex-col gap-2">
-						<a href="/criterias" class="btn variant-soft w-full justify-start">
+						<a href="/overview" class="btn variant-soft w-full justify-start">
 							<FolderKanban />
 							<span>Bảng điều khiển</span>
 						</a>
@@ -92,7 +92,7 @@
 <div class="border-surface-100-900 bg-white w-full h-full flex">
 	{#if !routeThatHideNavbar.includes(page.url.pathname)}
 		<div class="w-100"></div>
-		<Navbar isAdmin={data.user?.role === 'admin'} />
+		<Navbar isAdmin={data.user?.role === 'admin'} isChair={data.user?.isChairman === true} />
 	{/if}
 	<div class="{page.url.pathname === '/' ? '' : 'pt-16'} !bg-white w-full">
 		<ToastProvider>

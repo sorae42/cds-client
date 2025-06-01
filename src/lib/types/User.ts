@@ -6,6 +6,7 @@ export interface User {
     phone: string;
     role: string;
     password?: string;
+    isChairman?: boolean;
 }
 
 
