@@ -1,5 +1,5 @@
 import { submission } from '$lib/utilities';
-import { fail } from '@sveltejs/kit';
+import { fail, json } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, cookies }) => {
@@ -81,5 +81,23 @@ export const actions = {
         }
 
         return { success: true, data: result.data.data };
+    },
+
+    // New action to fetch sub-criteria by unit
+    fetchSubCriterias: async ({ request, cookies }) => {
+        const data = await request.formData();
+        const unitId = data.get('unitId')?.toString();
+
+        if (!unitId) return fail(400, { error: 'Unit ID is required' });
+
+        const result = await submission({
+            method: 'GET',
+            endpoint: `/subcriterias/by-unit?unitId=${unitId}`,
+            cookies
+        });
+
+        if (!result.ok) return fail(result.data.status, { error: result.data.message });
+
+        return result.data; // Just return the data directly
     }
 } satisfies Actions;

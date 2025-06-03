@@ -33,7 +33,7 @@
 	<div class="flex justify-between items-center">
 		<h3 class="h3">Chi tiết đánh giá</h3>
 		<div class="flex gap-2">
-			<a href="/management/ratings" class="btn preset-tonal">Quay lại</a>
+			<a href="../" class="btn preset-tonal">Quay lại</a>
 		</div>
 	</div>
 

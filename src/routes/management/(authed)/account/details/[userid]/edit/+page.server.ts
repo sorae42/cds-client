@@ -20,11 +20,12 @@ export const actions = {
         form.fullName = data.get('fullname')?.toString() || '';
         form.email = data.get('email')?.toString() || '';
         form.phone = data.get('phone-number')?.toString() || '';
+        form.role = data.get('role')?.toString() as 'user' | 'chair' | 'admin' || 'user';
 
-        const password = data.get('username')?.toString();
+        const password = data.get('password')?.toString();
 
         if (password)
-            form.password = data.get('password')?.toString() || '';
+            form.password = password;
 
         const result = await submission({
             method: 'POST',
@@ -48,11 +49,12 @@ export const actions = {
         form.fullName = data.get('fullname')?.toString() || '';
         form.email = data.get('email')?.toString() || '';
         form.phone = data.get('phone-number')?.toString() || '';
+        form.role = data.get('role')?.toString() as 'user' | 'chair' | 'admin' || 'user';
 
-        const password = data.get('username')?.toString();
+        const password = data.get('password')?.toString();
 
         if (password)
-            form.password = data.get('password')?.toString() || '';
+            form.password = password;
 
         const result = await submission({
             method: 'PUT',
@@ -66,6 +68,5 @@ export const actions = {
         if (!result.ok) return { success: false, message: result.data }
 
         redirect(303, '/management/account');
-
     }
 } satisfies Actions;

@@ -6,6 +6,12 @@
 
 	const { data }: PageProps = $props();
 	const user: User = data.data;
+
+	const roleOptions = [
+		{ value: 'user', label: 'Người dùng đơn vị' },
+		{ value: 'chair', label: 'Chủ tịch hội đồng' },
+		{ value: 'admin', label: 'Quản trị viên' }
+	];
 </script>
 
 <Form id={user?.id || 0}>
@@ -16,6 +22,25 @@
 		<TextInput name="fullname" label="Họ tên" value={user.fullName || ''} />
 		<TextInput type="email" name="email" label="Email" value={user.email || ''} required={true} />
 		<TextInput name="phone-number" label="Số điện thoại" value={user.phone || ''} required={true} />
+
+		<div class="form-group my-4">
+			<label for="role" class="label">
+				<span>Vai trò *</span>
+			</label>
+			<select
+				id="role"
+				name="role"
+				class="select"
+				value={user.role || 'user'}
+				required
+			>
+				{#each roleOptions as option}
+					<option value={option.value} selected={user.role === option.value}>
+						{option.label}
+					</option>
+				{/each}
+			</select>
+		</div>
 	</fieldset>
 	<fieldset>
 		<legend>Mật khẩu</legend>

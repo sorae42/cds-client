@@ -19,6 +19,7 @@ export const load = (async ({ cookies, url }) => {
         unauthorizedPath: url.pathname
     });
 
+    console.log('userResult', userResult.data);
     return {
         user: userResult.data
     };
