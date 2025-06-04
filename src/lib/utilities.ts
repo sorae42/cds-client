@@ -111,6 +111,10 @@ export async function submission(dataSubmission: Submission) {
 
         if (!data.ok && data.status !== 401) {
             console.error(`Error ${data.status}: ${dataSubmission.endpoint}`);
+            return {
+                ok: false,
+                message: response.data.message || "An error occurred",
+            }
         }
 
         return {

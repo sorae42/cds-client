@@ -39,7 +39,7 @@
 		<SquareChevronDown />
 	{/snippet}
 	{#each display as entry}
-		<Accordion.Item value={entry.id} headingElement="span">
+		<Accordion.Item value={entry.id}>
 			{#snippet control()}
 				<div class="d-content" style="--length:{presentation.length}">
 					<span class="w-fit">{entry.id}</span>

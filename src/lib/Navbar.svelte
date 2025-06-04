@@ -21,7 +21,7 @@
 	}
 </script>
 
-<Navigation.Rail expanded={true} bind:value={pathname} classes="w-78 fixed z-[5]">
+<Navigation.Rail expanded={true} value={pathname} onValueChange={(p) => pathname = p} classes="w-78 fixed z-[5]">
 	{#snippet tiles()}
 		<Navigation.Tile
 			labelExpanded="Tổng quan"

@@ -10,5 +10,5 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
         unauthorizedPath: '/management/account'
     })
 
-    redirect(303, '/management/account?action=delete');
+    redirect(308, '/management/account?action=delete');
 }

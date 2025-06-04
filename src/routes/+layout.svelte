@@ -13,6 +13,8 @@
 	} from 'lucide-svelte';
 	import type { LayoutProps } from './$types';
 	import { page } from '$app/state';
+	import { Toaster } from '@skeletonlabs/skeleton-svelte';
+	import { toaster } from '$lib/toaster';
 
 	let { children, data }: LayoutProps = $props();
 
@@ -34,7 +36,8 @@
 		else appbarTransparency = false;
 	}
 </script>
-
+  
+<Toaster {toaster}></Toaster>
 <AppBar classes="fixed {appbarTransparency ? 'bg-transparent' : ''} duration-300 z-[10]">
 	{#snippet trail()}
 		{#if page.url.pathname !== '/search'}
@@ -95,7 +98,7 @@
 		<Navbar isAdmin={data.user?.role === 'admin'} isChair={data.user?.isChairman === true} />
 	{/if}
 	<div class="{page.url.pathname === '/' ? '' : 'pt-16'} !bg-white w-full">
-			{@render children()}
+		{@render children()}
 	</div>
 </div>
 

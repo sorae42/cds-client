@@ -38,7 +38,7 @@
 	{#snippet trigger()}<Plus /> Thêm mới{/snippet}
 	{#snippet content()}
 		<article class="space-y-4">
-			<h3>Chọn người dùng để thêm vào đơn vị</h3>
+			<h3 class="h3">Chọn người dùng để thêm vào đơn vị</h3>
 
 			<!-- <form action="?/searchUser" method="POST" use:enhance>
 				<div class="input-group grid-cols-[auto_1fr_auto]">

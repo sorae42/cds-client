@@ -18,10 +18,10 @@
 	<h2>{!user?.id ? 'Thêm người mới' : 'Thay đổi thông tin'}</h2>
 	<fieldset>
 		<legend>Thông tin cá nhân</legend>
-		<TextInput name="username" label="Username" value={user.username || ''} required={true} />
-		<TextInput name="fullname" label="Họ tên" value={user.fullName || ''} />
-		<TextInput type="email" name="email" label="Email" value={user.email || ''} required={true} />
-		<TextInput name="phone-number" label="Số điện thoại" value={user.phone || ''} required={true} />
+		<TextInput name="username" label="Username" value={user?.username || ''} required={true} />
+		<TextInput name="fullname" label="Họ tên" value={user?.fullName || ''} />
+		<TextInput type="email" name="email" label="Email" value={user?.email || ''} required={true} />
+		<TextInput name="phone-number" label="Số điện thoại" value={user?.phone || ''} required={true} />
 
 		<div class="form-group my-4">
 			<label for="role" class="label">
@@ -31,11 +31,11 @@
 				id="role"
 				name="role"
 				class="select"
-				value={user.role || 'user'}
+				value={user?.role || 'user'}
 				required
 			>
 				{#each roleOptions as option}
-					<option value={option.value} selected={user.role === option.value}>
+					<option value={option.value} selected={user?.role === option.value}>
 						{option.label}
 					</option>
 				{/each}

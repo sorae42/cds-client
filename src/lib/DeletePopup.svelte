@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { Trash } from 'lucide-svelte';
+	import { toaster } from './toaster';
 
 	const { id } = $props();
 
@@ -14,7 +15,12 @@
 
 	function confimation() {
 		popoverClose();
-		goto(`${page.url.pathname}/details/${id}/delete`);
+		toaster.promise(goto(`${page.url.pathname}/details/${id}/delete`), {
+			loading: { title: 'Đang xoá...' },
+			success: { title: 'Xoá thành công!', closable: false },
+			error: { title: 'Xoá không thành công.', closable: false }
+		});
+		invalidateAll();
 	}
 </script>
 
