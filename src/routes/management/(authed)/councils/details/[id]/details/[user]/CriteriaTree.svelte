@@ -99,8 +99,8 @@
 </form>
 
 <Modal
-	bind:open={isOpen}
-	onOpenChange={(e) => !e.open && onClose()}
+	open={isOpen}
+	onOpenChange={(e) => (isOpen = e.open)}
 	contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl w-7xl min-h-full overflow-y-auto"
 	backdropClasses="backdrop-blur-sm"
 	triggerClasses="btn preset-tonal-primary"
@@ -191,7 +191,6 @@
 							{#each unitSubCriterias as subCriteria, index}
 								<Accordion.Item
 									value={subCriteria.id}
-									headingElement="span"
 									controlClasses="font-bold"
 									classes="border border-gray-400 rounded-sm mb-2"
 								>

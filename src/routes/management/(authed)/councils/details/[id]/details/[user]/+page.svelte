@@ -45,7 +45,6 @@
         <div class="flex justify-between items-center mb-4">
             <h4 class="h4">Phân công đánh giá</h4>
             <CriteriaTree
-                targetGroups={data.targetGroups}
                 units={data.units}
                 reviewerId={reviewer.reviewerId}
             />
