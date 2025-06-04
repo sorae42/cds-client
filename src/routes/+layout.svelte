@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { AppBar, ToastProvider, Popover } from '@skeletonlabs/skeleton-svelte';
+	import { AppBar, Popover } from '@skeletonlabs/skeleton-svelte';
 	import Navbar from '$lib/Navbar.svelte';
 	import {
 		LogIn,
@@ -95,9 +95,7 @@
 		<Navbar isAdmin={data.user?.role === 'admin'} isChair={data.user?.isChairman === true} />
 	{/if}
 	<div class="{page.url.pathname === '/' ? '' : 'pt-16'} !bg-white w-full">
-		<ToastProvider>
 			{@render children()}
-		</ToastProvider>
 	</div>
 </div>
 
