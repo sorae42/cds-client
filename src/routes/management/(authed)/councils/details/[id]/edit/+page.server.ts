@@ -10,7 +10,9 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
             endpoint: '/users',
             cookies
         });
-        return { council: null, users: users.data.items };
+        // Filter users to only show chairs
+        const chairUsers = users.data.items.filter((user: any) => user.role === 'chair');
+        return { council: null, users: chairUsers };
     }
 
     // Otherwise load existing council and users for edit mode
@@ -27,9 +29,14 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
         })
     ]);
 
+    console.log(usersResult.data.items);
+
+    // Filter users to only show chairs
+    const chairUsers = usersResult.data.items.filter((user: any) => user.role === 'chair');
+
     return { 
         council: councilResult.data,
-        users: usersResult.data.items
+        users: chairUsers
     };
 };
 

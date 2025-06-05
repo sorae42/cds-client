@@ -1,4 +1,5 @@
 import { redirect, type Cookies } from "@sveltejs/kit";
+import { toaster } from "./toaster";
 
 export async function streamJson(stream: ReadableStream<Uint8Array> | null) {
     if (stream == null) return { done: false, data: null };
@@ -114,6 +115,11 @@ export async function submission(dataSubmission: Submission) {
             return {
                 ok: false,
                 message: response.data.message || "An error occurred",
+                data: {
+                    status: data.status,
+                    message: response.data.message || "An error occurred",
+                    details: response.data.details || null
+                }
             }
         }
 

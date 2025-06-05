@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { applyAction, enhance } from '$app/forms';
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
 	import { Search } from 'lucide-svelte';
 	import TextInput from '$lib/crud/TextInput.svelte';
+	import { toaster } from '$lib/toaster.js';
 
 	let { data } = $props();
 	const isCreate = !data.council;
@@ -32,7 +33,19 @@
 	<div class="card p-4">
 		<h3 class="h3 mb-4">{isCreate ? 'Tạo hội đồng mới' : 'Chỉnh sửa hội đồng'}</h3>
 
-		<form method="POST" use:enhance>
+		<form
+			method="POST"
+			use:enhance={() => {
+				return async ({ result }) => {
+					if (result.type === "failure") {
+						toaster.error({ title: result.data?.error || 'Có lỗi xảy ra!' });
+						return;
+					}
+					toaster.success({ title: 'Cập nhật thành công!' });
+					applyAction(result);
+				};
+			}}
+		>
 			<div class="space-y-4">
 				<TextInput name="name" label="Tên hội đồng:" value={data.council?.name} required />
 
