@@ -3,6 +3,8 @@
 	import CRUDTable from '$lib/CRUDTable.svelte';
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
 	import { enhance } from '$app/forms';
+	import { toaster } from '$lib/toaster.js';
+	import { invalidateAll } from '$app/navigation';
 
 	let { data } = $props();
 	let council = data.council;
@@ -144,8 +146,18 @@
 					method="POST"
 					use:enhance={() => {
 						return async ({ result }) => {
+							if (result.type === 'failure') {
+								toaster.error({
+									title: result.data?.message || 'Thêm thành viên thất bại',
+								});
+								return;
+							}
 							if (result.type === 'success') {
 								handleModalClose();
+								toaster.success({
+									title: 'Thêm thành viên thành công!',
+								});
+								invalidateAll();
 								window.location.reload();
 							}
 						};
