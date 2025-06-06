@@ -47,7 +47,7 @@ export const actions = {
         });
 
         if (!result.ok) return { success: false, message: result.data };
-        redirect(303, '/management/unit');
+        redirect(303, '/management/units');
     },
 
     update: async ({ url, request, cookies }) => {
