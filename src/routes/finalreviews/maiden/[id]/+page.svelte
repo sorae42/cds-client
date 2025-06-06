@@ -1,10 +1,19 @@
 <script lang="ts">
-	import { ArrowLeft, Crown, Users, FileText, MapPin, User, CheckCircle } from 'lucide-svelte';
-	import { Accordion } from '@skeletonlabs/skeleton-svelte';
+	import { ArrowLeft, Crown, Users, FileText, MapPin, User, CheckCircle, Plus, Search } from 'lucide-svelte';
+	import { Accordion, Modal } from '@skeletonlabs/skeleton-svelte';
+	import { enhance } from '$app/forms';
+	import { toaster } from '$lib/toaster.js';
+	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
-	const { currentUser, allReviewers } = data;
+	const { currentUser, allReviewers, availableUsers } = data;
+
+	// Modal state for adding new members
+	let openUserSelect = $state(false);
+	let searchQuery = $state('');
+	let selectedUser = $state<any>(null);
 
 	// Calculate statistics
 	const totalReviewers = allReviewers.length;
@@ -12,6 +21,23 @@
 		sum + (reviewer.assignments?.length || 0), 0);
 	const reviewersWithAssignments = allReviewers.filter((reviewer: any) => 
 		reviewer.assignments && reviewer.assignments.length > 0).length;
+
+	// Filter users based on search
+	const filteredUsers = $derived(
+		searchQuery
+			? availableUsers.filter(
+					(user: any) =>
+						user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+						user.username.toLowerCase().includes(searchQuery.toLowerCase())
+				)
+			: availableUsers
+	);
+
+	function handleModalClose() {
+		openUserSelect = false;
+		searchQuery = '';
+		selectedUser = null;
+	}
 </script>
 
 <div class="p-8 space-y-8">
@@ -66,10 +92,15 @@
 
 	<!-- All Reviewers -->
 	<div class="card p-4">
-		<h4 class="h4 mb-4 flex items-center gap-2">
-			<Users />
-			Danh sách thành viên và nhiệm vụ
-		</h4>
+		<div class="flex justify-between items-center mb-4">
+			<h4 class="h4 flex items-center gap-2">
+				<Users />
+				Danh sách thành viên và nhiệm vụ ({totalReviewers})
+			</h4>
+			<button class="btn preset-tonal-primary" onclick={() => (openUserSelect = true)}>
+				<Plus />Thêm thành viên
+			</button>
+		</div>
 
 		<Accordion multiple collapsible>
 			{#snippet iconOpen()}
@@ -114,58 +145,107 @@
 					{/snippet}
 					{#snippet panel()}
 						<div class="p-4 space-y-4">
-							<!-- Reviewer Info -->
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div>
-									<strong>Tên đăng nhập:</strong>
-									{reviewer.username}
+							<div class="flex justify-between items-center">
+								<div class="text-sm text-surface-600-300">
+									{#if reviewer.assignments && reviewer.assignments.length > 0}
+										Thành viên này có {reviewer.assignments.length} nhiệm vụ được phân công
+									{:else}
+										Chưa có nhiệm vụ nào được phân công
+									{/if}
 								</div>
-								<div>
-									<strong>Họ tên:</strong>
-									{reviewer.fullName || 'Chưa cập nhật'}
-								</div>
+								<a
+									href="/finalreviews/maiden/{$page.params.id}/ratings/{reviewer.reviewerId}"
+									class="btn preset-filled-primary-500"
+								>
+									<FileText size={16} />
+									Xem chi tiết đánh giá
+								</a>
 							</div>
-
-							<!-- Assignments -->
-							{#if reviewer.assignments && reviewer.assignments.length > 0}
-								<div>
-									<h5 class="h5 mb-2">Nhiệm vụ được phân công:</h5>
-									<div class="space-y-2">
-										{#each reviewer.assignments as assignment, assignIndex}
-											<div class="card p-3 bg-surface-50-950 border border-primary-200">
-												<div class="flex justify-between items-start">
-													<div class="flex items-center gap-2 mb-2">
-														<span class="badge-icon preset-filled-primary-500 text-xs">
-															{assignIndex + 1}
-														</span>
-														<span class="font-medium">Nhiệm vụ #{assignment.id}</span>
-													</div>
-												</div>
-												<div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-													<div class="flex items-center gap-1">
-														<MapPin size={14} class="text-primary-500" />
-														<strong>Đơn vị:</strong>
-														<span>{assignment.unitName}</span>
-													</div>
-													<div class="flex items-center gap-1">
-														<FileText size={14} class="text-primary-500" />
-														<strong>Tiêu chí:</strong>
-														<span class="truncate">{assignment.subCriteriaName}</span>
-													</div>
-												</div>
-											</div>
-										{/each}
-									</div>
-								</div>
-							{:else}
-								<div class="text-center py-4">
-									<p class="text-surface-500">Chưa có nhiệm vụ nào được phân công</p>
-								</div>
-							{/if}
 						</div>
 					{/snippet}
 				</Accordion.Item>
 			{/each}
 		</Accordion>
 	</div>
+
+	<!-- Member Assignment Modal -->
+	<Modal
+		open={openUserSelect}
+		onOpenChange={(e) => (e.open ? (openUserSelect = true) : handleModalClose())}
+		triggerBase="btn preset-tonal"
+		contentBase="card bg-surface-100-900 p-4 space-y-4 w-100 shadow-xl"
+		backdropClasses="backdrop-blur-sm"
+	>
+		{#snippet content()}
+			<h3 class="h3">Chọn thành viên để thêm vào hội đồng</h3>
+
+			<div class="input-group grid-cols-[auto_1fr_auto]">
+				<div class="ig-cell preset-tonal"><Search /></div>
+				<input type="text" placeholder="Tìm kiếm..." bind:value={searchQuery} class="ig-input" />
+			</div>
+
+			<div class="max-h-[60vh] overflow-y-auto">
+				{#if filteredUsers.length > 0}
+					<div class="divide-y border rounded-container-token">
+						{#each filteredUsers as user}
+							<button
+								type="button"
+								class="w-full p-4 flex justify-between cursor-pointer"
+								class:bg-primary-100={selectedUser?.id === user.id}
+								class:text-primary-900={selectedUser?.id === user.id}
+								onclick={() => (selectedUser = selectedUser?.id === user.id ? null : user)}
+							>
+								<div class="text-left">
+									<p class="font-medium">{user.fullName}</p>
+									<p
+										class="text-sm"
+										class:text-primary-700={selectedUser?.id === user.id}
+										class:text-gray-500={selectedUser?.id !== user.id}
+									>
+										{user.username}
+									</p>
+								</div>
+								{#if selectedUser?.id === user.id}
+									<span class="text-primary-500">✓</span>
+								{/if}
+							</button>
+						{/each}
+					</div>
+				{:else}
+					<p class="text-gray-500 text-center p-4">Không tìm thấy người dùng phù hợp</p>
+				{/if}
+			</div>
+
+			<footer class="flex justify-between gap-4">
+				<button type="button" class="btn preset-tonal" onclick={handleModalClose}> Huỷ </button>
+				<form
+					action="?/addReviewer"
+					method="POST"
+					use:enhance={() => {
+						return async ({ result }) => {
+							if (result.type === 'failure') {
+								toaster.error({
+									title: result.data?.message || 'Thêm thành viên thất bại',
+								});
+								return;
+							}
+							if (result.type === 'success') {
+								handleModalClose();
+								toaster.success({
+									title: 'Thêm thành viên thành công!',
+								});
+								invalidateAll();
+								window.location.reload();
+							}
+						};
+					}}
+				>
+					<input type="hidden" name="userId" value={selectedUser?.id} />
+					<button type="submit" class="btn preset-filled" disabled={!selectedUser}>
+						Thêm thành viên
+					</button>
+				</form>
+			</footer>
+		{/snippet}
+	</Modal>
 </div>

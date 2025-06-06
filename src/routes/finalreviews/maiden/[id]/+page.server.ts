@@ -1,6 +1,6 @@
 import { submission } from '$lib/utilities';
-import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { error, fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, cookies, url, parent }) => {
     const { user } = await parent();
@@ -40,9 +40,43 @@ export const load: PageServerLoad = async ({ params, cookies, url, parent }) => 
         throw error(reviewersResult.data.status, reviewersResult.data.message);
     }
 
+    // Fetch all users to show available members for assignment
+    const usersResult = await submission({
+        method: 'GET',
+        endpoint: '/users',
+        cookies
+    });
+
+    // Filter out users who are already members
+    const availableUsers = usersResult.ok ? usersResult.data.items.filter(
+        (user: any) => !councilResult.data.members.find((m: any) => m.userId === user.id)
+    ) : [];
+
     return {
         currentUser: user,
         allReviewers: reviewersResult.data || [],
-        council: councilResult.data
+        council: councilResult.data,
+        availableUsers
     };
 };
+
+export const actions = {
+    addReviewer: async ({ request, cookies, params }) => {
+        const data = await request.formData();
+        const authId = Number(data.get('userId'));
+        
+        const result = await submission({
+            method: 'POST',
+            endpoint: '/reviewcouncil/add-reviewer',
+            cookies,
+            form: {
+                reviewCouncilId: Number(params.id),
+                authId
+            },
+            formType: 'obj'
+        });
+
+        if (!result.ok) return fail(result.data.status, { error: result.data.message });
+        return { success: true };
+    }
+} satisfies Actions;
