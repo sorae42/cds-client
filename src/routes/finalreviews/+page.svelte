@@ -137,7 +137,7 @@
 										<span class="badge preset-outlined-surface-500">
 											{council.memberCount} thành viên
 										</span>
-										<span class="badge preset-outlined-info-500">
+										<span class="badge preset-outlined-surface-500">
 											Thành viên
 										</span>
 										<span class="badge preset-outlined-primary-500">
