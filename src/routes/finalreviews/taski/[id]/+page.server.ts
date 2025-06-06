@@ -1,6 +1,6 @@
 import { submission } from '$lib/utilities';
-import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { error, fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, cookies, url, parent }) => {
     const { user } = await parent();
@@ -26,13 +26,20 @@ export const load: PageServerLoad = async ({ params, cookies, url, parent }) => 
     const isMember = councilResult.data.members.some((member: any) => member.userId === user.id);
     
     if (!isMember || isChairman) {
-        throw error(403, 'Access denied. You must be a member (not chairman) of this council.');
+        throw error(403, 'Access denied.');
     }
 
-    // Fetch all reviewers and their assignments
+    // Get the reviewer ID from council members based on logged-in user's userId
+    const currentUserMember = councilResult.data.members.find((member: any) => member.userId === user.id);
+    
+    if (!currentUserMember) {
+        throw error(403, 'User is not a member of this council.');
+    }
+    
+    // Fetch all reviewers and their assignments using the correct reviewer ID
     const reviewersResult = await submission({
         method: 'GET',
-        endpoint: `/reviewcouncil/view?reviewCouncilId=${params.id}`,
+        endpoint: `/reviewcouncil/view?reviewerId=${currentUserMember.id}`,
         cookies,
         unauthorizedPath: url.pathname
     });
@@ -41,15 +48,61 @@ export const load: PageServerLoad = async ({ params, cookies, url, parent }) => 
         throw error(reviewersResult.data.status, reviewersResult.data.message);
     }
 
-    // Filter to only show current user's assignments
-    const currentUserReviewer = reviewersResult.data.find((reviewer: any) => 
-        reviewer.username === user.username
-    );
+    // The API now returns assignments directly
+    const userAssignments = reviewersResult.data || [];
+
+    // Fetch subcriteria details for each assignment (now redundant since details are included)
+    const assignmentsWithDetails = userAssignments.map((assignment: any) => ({
+        ...assignment,
+        subCriteriaDetails: {
+            id: assignment.subCriteriaId,
+            name: assignment.subCriteriaName
+        }
+    }));
+
+    // Fetch review results for the current user
+    const reviewResultsResponse = await submission({
+        method: 'GET',
+        endpoint: `/reviewresults/list/?reviewerId=${currentUserMember.id}`,
+        cookies,
+        unauthorizedPath: url.pathname
+    });
+
+    const reviewResults = reviewResultsResponse.ok ? reviewResultsResponse.data : [];
 
     return {
         currentUser: user,
-        userAssignments: currentUserReviewer?.assignments || [],
+        userAssignments: assignmentsWithDetails,
+        reviewResults,
         council: councilResult.data,
-        reviewerInfo: currentUserReviewer
+        reviewerInfo: { assignments: userAssignments }
     };
 };
+
+export const actions = {
+    submitReview: async ({ request, cookies }) => {
+        const data = await request.formData();
+        
+        const reviewAssignmentId = Number(data.get('reviewAssignmentId'));
+        const score = Number(data.get('score')) || 10;
+        const comment = data.get('comment')?.toString() || '';
+
+        const result = await submission({
+            method: 'POST',
+            endpoint: '/reviewresults/submit',
+            cookies,
+            form: {
+                ReviewAssignmentId: reviewAssignmentId,
+                score: score,
+                comment: comment
+            },
+            formType: 'obj'
+        });
+
+        if (!result.ok) {
+            return fail(result.data.status, { error: result.data.message });
+        }
+
+        return { success: true, data: result.data.data };
+    }
+} satisfies Actions;
