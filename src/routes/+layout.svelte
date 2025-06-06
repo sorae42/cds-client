@@ -9,18 +9,22 @@
 		UserCircle,
 		User,
 		FolderKanban,
-		ChevronDown
+		ChevronDown,
+		Bell,
+		X
 	} from 'lucide-svelte';
 	import type { LayoutProps } from './$types';
 	import { page } from '$app/state';
 	import { Toaster } from '@skeletonlabs/skeleton-svelte';
 	import { toaster } from '$lib/toaster';
+	import { Modal } from '@skeletonlabs/skeleton-svelte';
 
 	let { children, data }: LayoutProps = $props();
 
 	const routeThatHideNavbar = ['/auth', '/', '/search'];
 
 	let appbarTransparency = $state(false);
+	let isLoggedIn = $derived(data.user && data.user.id);
 	let scrollY = $state(0);
 
 	let openState = $state(false);
@@ -35,8 +39,37 @@
 		if (scrollY < 42) appbarTransparency = true;
 		else appbarTransparency = false;
 	}
+
+	let drawerState = $state(false);
+
+	function drawerToggle(state: boolean) {
+		drawerState = state;
+	}
+
+	function formatTimestamp(timestamp: string) {
+		const date = new Date(timestamp);
+		const now = new Date();
+		const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+
+		if (diffInHours < 1) {
+			const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+			return `${diffInMinutes} phút trước`;
+		} else if (diffInHours < 24) {
+			return `${diffInHours} giờ trước`;
+		} else {
+			return date.toLocaleDateString('vi-VN', {
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit'
+			});
+		}
+	}
+
+	console.log(data.notification);
 </script>
-  
+
 <Toaster {toaster}></Toaster>
 <AppBar classes="fixed {appbarTransparency ? 'bg-transparent' : ''} duration-300 z-[10]">
 	{#snippet trail()}
@@ -46,12 +79,15 @@
 				<span>Tìm kiếm kết quả</span>
 			</a> -->
 		{/if}
-		{#if !data.token}
+		{#if !isLoggedIn}
 			<a href="/auth" class="btn preset-filled">
 				<span>Đăng nhập</span>
 				<LogIn />
 			</a>
 		{:else}
+			<button class="btn preset-tonal" onclick={() => drawerToggle(true)}>
+				<Bell />
+			</button>
 			<Popover
 				open={openState}
 				onOpenChange={(e) => (openState = e.open)}
@@ -101,5 +137,60 @@
 		{@render children()}
 	</div>
 </div>
+
+<Modal
+	open={drawerState}
+	onOpenChange={(e) => (drawerState = e.open)}
+	triggerBase="btn preset-tonal"
+	contentBase="bg-surface-100-900 space-y-4 shadow-xl w-[480px] h-screen"
+	positionerJustify="justify-end"
+	positionerAlign=""
+	positionerPadding=""
+	transitionsPositionerIn={{ x: 480, duration: 200 }}
+	transitionsPositionerOut={{ x: 480, duration: 200 }}
+>
+	{#snippet content()}
+		<div class="h-full flex flex-col">
+			<!-- Header -->
+			<div class="flex items-center justify-between mb-4 p-4 bg-surface-200">
+				<button
+					class="btn preset-outlined-surface-500 w-[42px] p-0"
+					onclick={() => drawerToggle(false)}
+				>
+					<X />
+				</button>
+				<span>{data.notification?.length || 0} thông báo </span>
+			</div>
+
+			<!-- Notifications List -->
+			<div class="flex-1 overflow-y-auto space-y-3 px-4">
+				{#if data.notification && data.notification.length > 0}
+					{#each data.notification as notification}
+						<div
+							class="p-3 border border-surface-300-600 rounded-lg hover:bg-surface-50-950 transition-colors"
+						>
+							<!-- Action and Time -->
+							<div class="flex justify-between items-center mb-2">
+								<span class="font-bold text-sm">{notification.action}</span>
+								<span class="text-xs text-surface-500">
+									{formatTimestamp(notification.timestamp)}
+								</span>
+							</div>
+							<!-- Description -->
+							<p class="text-sm text-surface-600-300 leading-relaxed">
+								{notification.description}
+							</p>
+						</div>
+					{/each}
+				{:else}
+					<div class="flex flex-col items-center justify-center py-12">
+						<Bell class="w-12 h-12 text-surface-400 mb-3" />
+						<p class="text-surface-500 text-center">Không có thông báo nào</p>
+					</div>
+				{/if}
+			</div>
+		</div>
+	{/snippet}
+</Modal>
 
 <svelte:window bind:scrollY on:scroll={checkScroll} />

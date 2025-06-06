@@ -5,6 +5,7 @@ import type { User } from '$lib/types/User';
 export const load: LayoutServerLoad = async ({ cookies }) => {
     const token = cookies.get("vn.CDS.AuthToken");
     let user: Partial<User> | null = null;
+    let notificationResult: any = { data: [] };
 
     if (token) {
         try {
@@ -57,10 +58,18 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
             console.error('Failed to fetch user data:', error);
             cookies.delete("vn.CDS.AuthToken", { path: '/' });
         }
+
+        notificationResult = await submission({
+            method: 'GET',
+            endpoint: '/actionlogs/notifications/me',
+            cookies,
+            unauthorizedPath: '/'
+        });
     }
 
     return {
         token,
-        user
+        user,
+        notification: notificationResult.data
     };
 };

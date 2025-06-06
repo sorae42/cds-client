@@ -40,6 +40,13 @@ export const load: PageServerLoad = async ({ params, cookies, url, parent }) => 
         throw error(reviewersResult.data.status, reviewersResult.data.message);
     }
 
+    // Fetch units for the adding subcriteria functionality
+    const unitsResult = await submission({
+        method: 'GET',
+        endpoint: '/units',
+        cookies
+    });
+
     // The data is already the assignments for the specific reviewer
     const assignments = reviewersResult.data || [];
 
@@ -53,7 +60,8 @@ export const load: PageServerLoad = async ({ params, cookies, url, parent }) => 
 
     return {
         reviewer,
-        council: councilResult.data
+        council: councilResult.data,
+        units: unitsResult.ok ? unitsResult.data : []
     };
 };
 
@@ -93,5 +101,52 @@ export const actions: Actions = {
             console.error('Submit review error:', err);
             return fail(500, { error: 'An error occurred while submitting the review' });
         }
+    },
+
+    assign: async ({ request, cookies, params }) => {
+        const data = await request.formData();
+
+        const reviewerId = Number(params.reviewerid);
+        const unitId = Number(data.get('unitId'));
+        const subCriteriaId = Number(data.get('subCriteriaId'));
+
+        const result = await submission({
+            method: 'POST',
+            endpoint: '/reviewcouncil/assign',
+            cookies,
+            form: {
+                reviewerId,
+                assignments: [
+                    {
+                        unitId,
+                        subCriteriaIds: [subCriteriaId]
+                    }
+                ]
+            },
+            formType: 'obj'
+        });
+
+        if (!result.ok) {
+            return fail(result.data.status, { error: result.data.message });
+        }
+
+        return { success: true, data: result.data.data };
+    },
+
+    fetchSubCriterias: async ({ request, cookies }) => {
+        const data = await request.formData();
+        const unitId = data.get('unitId')?.toString();
+
+        if (!unitId) return fail(400, { error: 'Unit ID is required' });
+
+        const result = await submission({
+            method: 'GET',
+            endpoint: `/subcriterias/by-unit?unitId=${unitId}`,
+            cookies
+        });
+
+        if (!result.ok) return fail(result.data.status, { error: result.data.message });
+
+        return result.data; // Just return the data directly
     }
 };

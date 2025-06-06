@@ -88,7 +88,6 @@
 			presentation={['Tên thành viên', 'Tên đăng nhập']}
 			dataBody={['name', 'username']}
 			updateButton={false}
-			deleteButton={false}
 		/>
 	</div>
 
