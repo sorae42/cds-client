@@ -21,7 +21,12 @@
 	}
 </script>
 
-<Navigation.Rail expanded={true} value={pathname} onValueChange={(p) => pathname = p} classes="w-78 fixed z-[5]">
+<Navigation.Rail
+	expanded={true}
+	value={pathname}
+	onValueChange={(p) => (pathname = p)}
+	classes="w-78 fixed z-[5]"
+>
 	{#snippet tiles()}
 		<Navigation.Tile
 			labelExpanded="Tổng quan"
@@ -48,17 +53,16 @@
 		>
 			<Star />
 		</Navigation.Tile>
-		{#if isChair}
-			<hr class="bg-black w-full" />
-			<Navigation.Tile
-				labelExpanded="Hội đồng thẩm định"
-				href="/finalreviews"
-				id="/finalreviews"
-				classes={isActiveRoute('/finalreviews') ? 'border-l-4 border-primary-500' : ''}
-			>
-				<Handshake />
-			</Navigation.Tile>
-		{/if}
+		<hr class="bg-black w-full" />
+		<Navigation.Tile
+			labelExpanded="Hội đồng thẩm định"
+			href="/finalreviews"
+			id="/finalreviews"
+			classes={isActiveRoute('/finalreviews') ? 'border-l-4 border-primary-500' : ''}
+		>
+			<Handshake />
+		</Navigation.Tile>
+
 		{#if isAdmin}
 			<hr class="bg-black w-full" />
 			<Navigation.Tile
