@@ -9,6 +9,8 @@
 	let isVerifyOtp = $state(false);
 	let username = $state('');
 
+	let processing = $state(false);
+
 	const redirectTo = page.url.searchParams.get('redirectTo');
 </script>
 
@@ -20,9 +22,13 @@
 			method="post"
 			class="[&>div>*]:mt-6 text-center"
 			use:enhance={() => {
+				success = true;
+				processing = true;
+
 				return async ({ result }: { result: any }) => {
 					success = result.data.success;
 					message = result.data.message;
+					processing = false;
 
 					if (result.data.needOtp) {
 						username = result.data.username;
@@ -74,7 +80,7 @@
 						/>
 					</div>
 					<div class="input-group w-full">
-						<button type="submit" class="btn preset-filled">Đăng nhập</button>
+						<button type="submit" class="btn preset-filled" disabled={processing}>Đăng nhập</button>
 					</div>
 				</div>
 			{:else}
