@@ -66,8 +66,6 @@
 			});
 		}
 	}
-
-	console.log(data.notification);
 </script>
 
 <Toaster {toaster}></Toaster>
