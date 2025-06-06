@@ -79,6 +79,7 @@
 				</div>
 			{:else}
 				<div transition:slide>
+					<input type="hidden" name="username" value={username} />
 					<div class="input-group grid-cols-[auto_1fr_auto]">
 						<div class="ig-cell preset-tonal">
 							<KeyRound size={16} />
@@ -93,10 +94,13 @@
 							maxlength="6"
 							required
 						/>
-						<input type="hidden" name="username" value={username} />
 					</div>
-					<div>
-						<button type="submit" class="btn preset-filled w-full">Xác nhận</button>
+					<div class="flex justify-between">
+						<div class="flex items-center gap-2">
+							<input type="checkbox" name="remember" id="remember" class="ig-checkbox" />
+							<label for="remember" class="ig-label">Ghi nhớ thiết bị trong vòng 1 tháng</label>
+						</div>
+						<button type="submit" class="btn preset-filled">Xác nhận</button>
 					</div>
 				</div>
 			{/if}
