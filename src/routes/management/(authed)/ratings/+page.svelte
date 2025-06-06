@@ -95,12 +95,14 @@
 						<a class="btn preset-filled" href="/management/ratings/details/{period.id}"
 							><Info />Chi tiết</a
 						>
-						<a
-							class="btn preset-filled-primary-500"
-							href="/management/ratings/details/{period.id}/edit"
-						>
-							<Pencil />Chỉnh sửa
-						</a>
+						{#if !period.isLocked}
+							<a
+								class="btn preset-filled-primary-500"
+								href="/management/ratings/details/{period.id}/edit"
+							>
+								<Pencil />Chỉnh sửa
+							</a>
+						{/if}
 						{#if period.isLocked}
 							<button class="btn preset-tonal-primary" onclick={() => handleUnlockPeriod(period)}>
 								<Lock />Mở khoá

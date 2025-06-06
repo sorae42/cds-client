@@ -58,9 +58,11 @@
     <div class="card p-4">
         <div class="flex justify-between items-center mb-4">
             <h4 class="h4">Đơn vị tham gia ({period.units?.length || 0})</h4>
-            <button class="btn preset-tonal-primary" onclick={() => (openUnitsModal = true)}>
-                Quản lý đơn vị
-            </button>
+            {#if !period.isLocked}
+                <button class="btn preset-tonal-primary" onclick={() => (openUnitsModal = true)}>
+                    Quản lý đơn vị
+                </button>
+            {/if}
         </div>
         <CRUDTable
             data={unitTableData}
