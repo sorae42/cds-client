@@ -23,7 +23,7 @@ export interface Submission {
     endpoint: string,
     cookies: Cookies,
     form?: any,
-    formType?: 'url' | 'obj' | 'raw', // update type definition
+    formType?: 'url' | 'obj' | 'raw' | 'formdata', // update type definition
     unauthorizedPath?: string
 }
 
@@ -62,6 +62,13 @@ export async function submission(dataSubmission: Submission) {
                         ? dataSubmission.form 
                         : new URLSearchParams(dataSubmission.form);
                     formData.body = params.toString();
+                    break;
+                }
+                case 'formdata': {
+                    if (!(dataSubmission.form instanceof FormData)) {
+                        throw new Error('Form must be instance of FormData for formdata type');
+                    }
+                    formData.body = dataSubmission.form;
                     break;
                 }
                 case 'obj':
