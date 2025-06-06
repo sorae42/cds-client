@@ -70,7 +70,7 @@ export const actions = {
         const data = await request.formData();
         console.log(data);
 
-        const reviewerId = params.user;
+        const reviewerId = Number(params.user);
         const unitId = Number(data.get('unitId'));
         const subCriteriaId = Number(data.get('subCriteriaId'));
 
@@ -80,8 +80,12 @@ export const actions = {
             cookies,
             form: {
                 reviewerId,
-                unitId,
-                subCriteriaId
+                assignments: [
+                    {
+                        unitId,
+                        subCriteriaIds: [subCriteriaId]
+                    }
+                ]
             },
             formType: 'obj'
         });
