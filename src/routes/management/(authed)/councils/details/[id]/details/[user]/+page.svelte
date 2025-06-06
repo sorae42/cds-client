@@ -4,10 +4,10 @@
     import CriteriaTree from './CriteriaTree.svelte';
 
     let { data } = $props();
-    const reviewer = data.reviewer;
     
+    // Transform assignments data for the table
     let assignmentTableData = $state(data.assignments.map((assignment: any) => ({
-        id: assignment.reviewAssignmentId,
+        id: assignment.reviewAssignmentId || assignment.id,
         unit: assignment.unitName,
         criteria: assignment.subCriteriaName
     })));
@@ -23,30 +23,12 @@
         </div>
     </div>
 
-    <div class="card p-4 space-y-4">
-        <h4 class="h4">Thông tin thành viên</h4>
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <strong>Tên thành viên:</strong>
-                {reviewer?.fullName || 'Chưa cập nhật'}
-            </div>
-            <div>
-                <strong>Tên đăng nhập:</strong>
-                {reviewer?.username}
-            </div>
-            <div>
-                <strong>Vai trò:</strong>
-                {reviewer?.isChair ? 'Chủ tịch' : 'Thành viên'}
-            </div>
-        </div>
-    </div>
-
     <div class="card p-4">
         <div class="flex justify-between items-center mb-4">
-            <h4 class="h4">Phân công đánh giá</h4>
+            <h4 class="h4">Phân công đánh giá ({assignmentTableData.length})</h4>
             <CriteriaTree
                 units={data.units}
-                reviewerId={reviewer?.reviewerId}
+                reviewerId={data.reviewer}
             />
         </div>
 

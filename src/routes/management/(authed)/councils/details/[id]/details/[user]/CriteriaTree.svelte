@@ -7,12 +7,9 @@
 
 	let isOpen = $state(false);
 	let assignForm: HTMLFormElement;
-	let fetchForm: HTMLFormElement;
 	let currentStep = $state(1);
 	let selectedSubCriteria = $state<{ id: number; name: string } | null>(null);
 	let selectedUnit = $state<{ id: number; name: string } | null>(null);
-	let unitSubCriterias = $state<any[]>([]);
-	let isLoadingSubCriterias = $state(false);
 
 	const steps = [
 		{ label: 'Đơn vị đánh giá', description: 'Chọn đơn vị đánh giá tiêu chí.' },
@@ -29,24 +26,16 @@
 		currentStep = 1;
 		selectedSubCriteria = null;
 		selectedUnit = null;
-		unitSubCriterias = [];
 	}
 
 	function handleSelectCriteria(sub: any) {
-		selectedSubCriteria = { id: sub.id, name: sub.name };
+		selectedSubCriteria = { id: sub.subCriteriaId, name: sub.subCriteriaName };
 		currentStep = 3;
 	}
 
 	function handleSelectUnit(unit: any) {
 		selectedUnit = { id: unit.id, name: unit.name };
-		isLoadingSubCriterias = true;
-		
-		// Set the unit ID in the form and submit
-		const unitIdInput = fetchForm.querySelector('[name="unitId"]') as HTMLInputElement;
-		if (unitIdInput) {
-			unitIdInput.value = unit.id.toString();
-			fetchForm.requestSubmit();
-		}
+		currentStep = 2;
 	}
 
 	function handleConfirm() {
@@ -76,26 +65,6 @@
 	<input type="hidden" name="reviewerId" value={reviewerId} />
 	<input type="hidden" name="unitId" value={selectedUnit?.id || ''} />
 	<input type="hidden" name="subCriteriaId" value={selectedSubCriteria?.id || ''} />
-</form>
-
-<form
-	bind:this={fetchForm}
-	action="?/fetchSubCriterias"
-	method="POST"
-	class="hidden"
-	use:enhance={() => {
-		return async ({ result }) => {
-			isLoadingSubCriterias = false;
-			if (result.type === 'success') {
-				unitSubCriterias = Array.isArray(result.data) ? result.data : [];
-				currentStep = 2;
-			} else {
-				unitSubCriterias = [];
-			}
-		};
-	}}
->
-	<input type="hidden" name="unitId" value="" />
 </form>
 
 <Modal
@@ -175,62 +144,45 @@
 					</table>
 				</div>
 			{:else if currentStep === 2}
-				<div class="p-4">					
-					{#if isLoadingSubCriterias}
-						<div class="text-center py-8">
-							<p class="text-surface-500">Đang tải danh sách tiêu chí...</p>
-						</div>
-					{:else if unitSubCriterias.length > 0}
-						<Accordion multiple collapsible>
-							{#snippet iconOpen()}
-								<SquareChevronUp />
-							{/snippet}
-							{#snippet iconClosed()}
-								<SquareChevronDown />
-							{/snippet}
-							{#each unitSubCriterias as subCriteria, index}
-								<Accordion.Item
-									value={subCriteria.id}
-									controlClasses="font-bold"
-									classes="border border-gray-400 rounded-sm mb-2"
-								>
-									{#snippet control()}
-										<span class="flex justify-between items-center w-full">
-											<span class="flex items-center gap-2">
-												<span class="badge-icon preset-outlined-surface-500">
-													{index + 1}
-												</span>
-												<span class="text-sm">{subCriteria.name}</span>
+				{@const selectedUnitData = units.find((u: any) => u.id === selectedUnit?.id)}
+				<div class="p-4">
+					{#if selectedUnitData?.scoredAssignments && selectedUnitData.scoredAssignments.length > 0}
+						<table class="table">
+							<thead>
+								<tr>
+									<th>STT</th>
+									<th>Tiêu chí con</th>
+									<th>Điểm</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each selectedUnitData.scoredAssignments as scored, index}
+									<tr>
+										<td class="text-sm">{index + 1}</td>
+										<td class="text-sm">{scored.subCriteriaName}</td>
+										<td class="text-sm">
+											<span class="badge preset-filled-success-500">
+												{scored.score} điểm
 											</span>
-											<span class="badge preset-outlined-surface-500">
-												{subCriteria.maxScore} điểm
-											</span>
-										</span>
-									{/snippet}
-									{#snippet panel()}
-										<div class="p-4">
-											<div class="mb-4">
-												<h6 class="font-medium text-sm text-surface-600-300 mb-1">Mô tả:</h6>
-												<p class="text-sm">{subCriteria.description || 'Chưa có mô tả'}</p>
-											</div>
-											<div class="flex justify-end">
-												<button
-													type="button"
-													class="btn btn-sm preset-filled-primary-500"
-													onclick={() => handleSelectCriteria(subCriteria)}
-												>
-													<Plus size={14} />
-													Chọn tiêu chí này
-												</button>
-											</div>
-										</div>
-									{/snippet}
-								</Accordion.Item>
-							{/each}
-						</Accordion>
+										</td>
+										<td>
+											<button
+												type="button"
+												class="btn btn-sm preset-filled-primary-500"
+												onclick={() => handleSelectCriteria(scored)}
+											>
+												<Plus size={14} />
+												Chọn
+											</button>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
 					{:else}
 						<div class="text-center py-8">
-							<p class="text-surface-500">Không có tiêu chí nào cho đơn vị này</p>
+							<p class="text-surface-500">Không có tiêu chí đã đánh giá nào cho đơn vị này</p>
 						</div>
 					{/if}
 				</div>
