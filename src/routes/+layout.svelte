@@ -64,7 +64,7 @@
 			>
 				{#snippet trigger()}
 					<UserCircle />
-					<span>{data.user?.fullName || 'Người dùng'}</span>
+					<span>{data.user?.fullName || data.user?.username || 'Người dùng'}</span>
 					<ChevronDown />
 				{/snippet}
 				{#snippet content()}

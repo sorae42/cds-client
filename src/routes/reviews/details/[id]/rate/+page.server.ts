@@ -45,6 +45,7 @@ export const actions = {
         const subCriteriaId = Number(data.get('subCriteriaId'));
         const periodId = Number(params.id);
         const assignmentId = data.get('assignmentId')?.toString();
+        const evidenceFile = data.get('evidenceFiles') as File | null;
 
         // Validate required fields
         if (isNaN(subCriteriaId) || isNaN(periodId) || isNaN(score)) {
@@ -53,7 +54,47 @@ export const actions = {
             });
         }
 
+        // Validate file if provided
+        if (evidenceFile && evidenceFile.size > 0) {
+            // Check file size (10MB limit)
+            if (evidenceFile.size > 10 * 1024 * 1024) {
+                return fail(400, { 
+                    error: 'File size exceeds 10MB limit' 
+                });
+            }
+
+            // Check file type
+            const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'image/jpeg',
+                'image/jpg', 
+                'image/png',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            ];
+
+            if (!allowedTypes.includes(evidenceFile.type)) {
+                return fail(400, { 
+                    error: 'File type not supported. Please upload PDF, DOC, DOCX, JPG, PNG, XLS, or XLSX files.' 
+                });
+            }
+        }
+
         let result;
+
+        // Prepare form data for submission
+        const formData = new FormData();
+        formData.append('subCriteriaId', subCriteriaId.toString());
+        formData.append('periodId', periodId.toString());
+        formData.append('score', score.toString());
+        formData.append('comment', comment);
+        
+        // Add file if provided
+        if (evidenceFile && evidenceFile.size > 0) {
+            formData.append('evidenceFile', evidenceFile);
+        }
 
         // Check if this is an edit (has assignmentId and score is not null) or create (new evaluation)
         if (assignmentId) {
@@ -62,13 +103,8 @@ export const actions = {
                 method: 'PUT',
                 endpoint: `/subcriteriaassignments/submit/${assignmentId}`,
                 cookies,
-                form: {
-                    subCriteriaId,
-                    periodId,
-                    score,
-                    comment
-                },
-                formType: 'obj'
+                form: formData,
+                formType: 'formdata'
             });
         } else {
             // Creating new evaluation
@@ -76,13 +112,8 @@ export const actions = {
                 method: 'POST',
                 endpoint: `/subcriteriaassignments/submit`,
                 cookies,
-                form: {
-                    subCriteriaId,
-                    periodId,
-                    score,
-                    comment
-                },
-                formType: 'obj'
+                form: formData,
+                formType: 'formdata'
             });
         }
 

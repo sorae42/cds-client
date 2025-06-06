@@ -63,7 +63,6 @@
 	{#each data.groupDetails.parentCriterias as criteria, index}
 		<Accordion.Item
 			value={criteria.id}
-			headingElement="span"
 			controlClasses="font-bold"
 			classes="border border-gray-400 rounded-sm"
 		>
@@ -92,6 +91,7 @@
 					dataBody={['name', 'maxScore']}
 					presentationSub={['Minh chứng']}
 					dataSub={['evidenceInfo']}
+					detailButton={false}
 					updateButton={false}
 					deleteButton={false}
 				/>
