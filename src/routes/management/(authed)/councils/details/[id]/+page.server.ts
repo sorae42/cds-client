@@ -20,7 +20,7 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 
     // Filter out users who are already members
     const availableUsers = usersResult.data.items.filter(
-        (user: any) => !councilResult.data.members.find((m: any) => m.id === user.id)
+        (user: any) => !councilResult.data.members.find((m: any) => m.userId === user.id)
     );
 
     return { 
