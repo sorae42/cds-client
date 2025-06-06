@@ -6,7 +6,7 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
     const [assignments, targetGroups, units] = await Promise.all([
         submission({
             method: 'GET',
-            endpoint: `/reviewcouncil/assignments/${params.id}`,
+            endpoint: `/reviewcouncil/view?reviewerId=${params.user}`,
             cookies
         }),
         submission({
@@ -45,22 +45,32 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
         return data;
     });
 
-    const reviewer = assignments.data.find((r: any) => r.reviewerId.toString() === params.user);
+    // Handle the new API response structure
+    // assignments.data is now directly an array of assignment objects
+    const reviewerAssignments = assignments.data || [];
+    
+    // Create a reviewer object with the expected structure
+    const reviewer = {
+        reviewerId: parseInt(params.user),
+        fullName: 'N/A', // This info might need to be fetched separately if needed
+        username: 'N/A',  // This info might need to be fetched separately if needed
+        isChair: false    // This info might need to be fetched separately if needed
+    };
 
     return {
         reviewer,
-        assignments: reviewer?.assignments || [],
+        assignments: reviewerAssignments,
         targetGroups: processedGroups,
         units: units.data
     };
 };
 
 export const actions = {
-    assign: async ({ request, cookies }) => {
+    assign: async ({ request, cookies, params }) => {
         const data = await request.formData();
         console.log(data);
 
-        const reviewerId = Number(data.get('reviewerId'));
+        const reviewerId = params.user;
         const unitId = Number(data.get('unitId'));
         const subCriteriaId = Number(data.get('subCriteriaId'));
 

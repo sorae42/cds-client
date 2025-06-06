@@ -21,6 +21,7 @@
 			error: { title: 'Xoá không thành công.', closable: false }
 		});
 		invalidateAll();
+		window.location.reload();
 	}
 </script>
 

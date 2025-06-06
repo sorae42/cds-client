@@ -7,7 +7,7 @@
     const reviewer = data.reviewer;
     
     let assignmentTableData = $state(data.assignments.map((assignment: any) => ({
-        id: assignment.id,
+        id: assignment.reviewAssignmentId,
         unit: assignment.unitName,
         criteria: assignment.subCriteriaName
     })));
@@ -28,15 +28,15 @@
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <strong>Tên thành viên:</strong>
-                {reviewer.fullName || 'Chưa cập nhật'}
+                {reviewer?.fullName || 'Chưa cập nhật'}
             </div>
             <div>
                 <strong>Tên đăng nhập:</strong>
-                {reviewer.username}
+                {reviewer?.username}
             </div>
             <div>
                 <strong>Vai trò:</strong>
-                {reviewer.isChair ? 'Chủ tịch' : 'Thành viên'}
+                {reviewer?.isChair ? 'Chủ tịch' : 'Thành viên'}
             </div>
         </div>
     </div>
@@ -46,7 +46,7 @@
             <h4 class="h4">Phân công đánh giá</h4>
             <CriteriaTree
                 units={data.units}
-                reviewerId={reviewer.reviewerId}
+                reviewerId={reviewer?.reviewerId}
             />
         </div>
 

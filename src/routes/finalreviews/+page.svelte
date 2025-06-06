@@ -1,108 +1,180 @@
 <script lang="ts">
 	import {
-		Pencil,
-		Plus,
 		SquareChevronDown,
 		SquareChevronUp,
-		Lock,
-		Unlock,
 		Eye,
-		Info
+		Crown,
+		Users,
+
+		Cog,
+
+		Clipboard
+
+
 	} from 'lucide-svelte';
 	import type { PageProps } from './$types';
-	import { Accordion, Modal } from '@skeletonlabs/skeleton-svelte';
-	import TextInput from '$lib/crud/TextInput.svelte';
-	import CRUDTable from '$lib/CRUDTable.svelte';
-	import Pagination from '$lib/Pagination.svelte';
-	import { page } from '$app/state';
+	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 
 	let { data }: PageProps = $props();
-	let periods: Array<any> = $state(data.data);
-	let currentPage = $state(data.pagination.page);
-	let pageSize = $state(data.pagination.pageSize);
-	let currentPeriodId = $state<string>('');
-	let openLockModal = $state(false);
-	let openUnlockModal = $state(false);
-
-	function handleLockPeriod(period: any) {
-		currentPeriodId = period.id;
-		openLockModal = true;
-	}
-
-	function handleUnlockPeriod(period: any) {
-		currentPeriodId = period.id;
-		openUnlockModal = true;
-	}
-
-	function handlePageChange(event: { page: number }) {
-		const url = new URL(window.location.href);
-		url.searchParams.set('page', event.page.toString());
-		window.location.assign(url.toString());
-	}
-
-	function handlePageSizeChange(event: { pageSize: number }) {
-		const url = new URL(window.location.href);
-		url.searchParams.set('pageSize', event.pageSize.toString());
-		url.searchParams.set('page', '1');
-		window.location.assign(url.toString());
-	}
+	let chairCouncils: Array<any> = $state(data.chairCouncils || []);
+	let memberCouncils: Array<any> = $state(data.memberCouncils || []);
 </script>
 
 <div class="p-8 flex justify-between">
-	<h3 class="h3">Chọn kỳ đánh giá để tiến hành thẩm định</h3>
+	<h3 class="h3">Hội đồng thẩm định của tôi</h3>
 </div>
 
-<Accordion multiple collapsible classes="p-8 pt-0">
-	{#snippet iconOpen()}
-		<SquareChevronUp />
-	{/snippet}
-	{#snippet iconClosed()}
-		<SquareChevronDown />
-	{/snippet}
-	{#each periods as period}
-		<Accordion.Item
-			value={period.id}
-			headingElement="span"
-			controlClasses="font-bold"
-			classes="border border-gray-400 rounded-sm"
-		>
-			{#snippet control()}
-				<span class="flex justify-between items-center">
-					<span class="flex items-center gap-2">
-						{period.name}
-						{#if period.isLocked}
-							<span class="badge preset-tonal-error">Đã khoá</span>
-						{/if}
-					</span>
-					<div class="flex gap-2">
-						<span class="badge preset-outlined-surface-500">
-							{new Date(period.startDate).toLocaleDateString('vi-VN')} - {new Date(
-								period.endDate
-							).toLocaleDateString('vi-VN')}
-						</span>
-					</div>
-				</span>
-			{/snippet}
-			{#snippet panel()}
-				<div class="space-y-4">
-					<div class="flex justify-end gap-2">
-						<a class="btn preset-filled" href="/reviews/details/{period.id}"
-							><Info />Chi tiết & Đánh giá</a
+{#if chairCouncils.length === 0 && memberCouncils.length === 0}
+	<div class="p-8 pt-0">
+		<div class="card p-8 text-center space-y-4">
+			<div class="text-6xl opacity-50">👥</div>
+			<h4 class="h4">Không có hội đồng nào</h4>
+			<p class="text-surface-500">
+				Bạn chưa tham gia vào bất kỳ hội đồng thẩm định nào.
+			</p>
+			<p class="text-sm text-surface-400">
+				Vui lòng liên hệ với quản trị viên để được thêm vào hội đồng thẩm định.
+			</p>
+		</div>
+	</div>
+{:else}
+	<div class="p-8 pt-0 space-y-8">
+		<!-- Chairman Section -->
+		{#if chairCouncils.length > 0}
+			<div>
+				<h4 class="h4 mb-4 flex items-center gap-2">
+					<Crown class="text-yellow-500" />
+					Chủ tịch hội đồng ({chairCouncils.length})
+				</h4>
+				<Accordion multiple collapsible>
+					{#snippet iconOpen()}
+						<SquareChevronUp />
+					{/snippet}
+					{#snippet iconClosed()}
+						<SquareChevronDown />
+					{/snippet}
+					{#each chairCouncils as council}
+						<Accordion.Item
+							value={`chair-${council.id}`}
+							controlClasses="font-bold"
+							classes="border border-yellow-400 rounded-sm"
 						>
-					</div>
-				</div>
-			{/snippet}
-		</Accordion.Item>
-	{/each}
-</Accordion>
+							{#snippet control()}
+								<span class="flex justify-between items-center">
+									<span class="flex items-center gap-2">
+										{council.name}
+									</span>
+									<div class="flex gap-2">
+										<span class="badge preset-outlined-surface-500">
+											{council.memberCount} thành viên
+										</span>
+										<span class="badge preset-outlined-warning-500">
+											Chủ tịch
+										</span>
+										<span class="badge preset-outlined-primary-500">
+											{new Date(council.createdAt).toLocaleDateString('vi-VN')}
+										</span>
+									</div>
+								</span>
+							{/snippet}
+							{#snippet panel()}
+								<div class="space-y-4">
+									<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<div>
+											<strong>Chủ tịch hội đồng:</strong>
+											{council.chair?.fullName || 'Chưa có'}
+										</div>
+										<div>
+											<strong>Ngày tạo:</strong>
+											{new Date(council.createdAt).toLocaleDateString('vi-VN')}
+										</div>
+										{#if council.description}
+											<div class="col-span-2">
+												<strong>Mô tả:</strong>
+												{council.description}
+											</div>
+										{/if}
+									</div>
+									<div class="flex justify-end gap-2">
+										<a class="btn preset-filled" href="/finalreviews/maiden/{council.id}"
+											><Cog />Quản lý hội đồng</a
+										>
+									</div>
+								</div>
+							{/snippet}
+						</Accordion.Item>
+					{/each}
+				</Accordion>
+			</div>
+		{/if}
 
-<div class="px-8">
-	<Pagination
-		data={periods}
-		page={currentPage}
-		{pageSize}
-		count={data.pagination.totalCount}
-		onPageChange={handlePageChange}
-		onPageSizeChange={handlePageSizeChange}
-	/>
-</div>
+		<!-- Member Section -->
+		{#if memberCouncils.length > 0}
+			<div>
+				<h4 class="h4 mb-4 flex items-center gap-2">
+					<Users class="text-blue-500" />
+					Thành viên hội đồng ({memberCouncils.length})
+				</h4>
+				<Accordion multiple collapsible>
+					{#snippet iconOpen()}
+						<SquareChevronUp />
+					{/snippet}
+					{#snippet iconClosed()}
+						<SquareChevronDown />
+					{/snippet}
+					{#each memberCouncils as council}
+						<Accordion.Item
+							value={`member-${council.id}`}
+							controlClasses="font-bold"
+							classes="border border-blue-400 rounded-sm"
+						>
+							{#snippet control()}
+								<span class="flex justify-between items-center">
+									<span class="flex items-center gap-2">
+										{council.name}
+									</span>
+									<div class="flex gap-2">
+										<span class="badge preset-outlined-surface-500">
+											{council.memberCount} thành viên
+										</span>
+										<span class="badge preset-outlined-info-500">
+											Thành viên
+										</span>
+										<span class="badge preset-outlined-primary-500">
+											{new Date(council.createdAt).toLocaleDateString('vi-VN')}
+										</span>
+									</div>
+								</span>
+							{/snippet}
+							{#snippet panel()}
+								<div class="space-y-4">
+									<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<div>
+											<strong>Chủ tịch hội đồng:</strong>
+											{council.chair?.fullName || 'Chưa có'}
+										</div>
+										<div>
+											<strong>Ngày tạo:</strong>
+											{new Date(council.createdAt).toLocaleDateString('vi-VN')}
+										</div>
+										{#if council.description}
+											<div class="col-span-2">
+												<strong>Mô tả:</strong>
+												{council.description}
+											</div>
+										{/if}
+									</div>
+									<div class="flex justify-end gap-2">
+										<a class="btn preset-filled" href="/finalreviews/taski/{council.id}"
+											><Clipboard />Thẩm định tiêu chí</a
+										>
+									</div>
+								</div>
+							{/snippet}
+						</Accordion.Item>
+					{/each}
+				</Accordion>
+			</div>
+		{/if}
+	</div>
+{/if}

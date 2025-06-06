@@ -16,30 +16,30 @@
             <TextInput 
                 name="name" 
                 label="Tên đơn vị" 
-                value={unit.name} 
+                value={unit?.name} 
                 required={true} 
             />
             <TextInput 
                 name="code" 
                 label="Mã đơn vị" 
-                value={unit.code} 
+                value={unit?.code} 
                 required={true} 
             />
             <TextInput 
                 name="type" 
                 label="Loại đơn vị" 
-                value={unit.type} 
+                value={unit?.type} 
                 required={true} 
             />
             <TextInput 
                 name="address" 
                 label="Địa chỉ" 
-                value={unit.address || ''} 
+                value={unit?.address || ''} 
             />
             <TextInput 
                 name="description" 
                 label="Mô tả" 
-                value={unit.description || ''}
+                value={unit?.description || ''}
             />
         </fieldset>
     </Form>
