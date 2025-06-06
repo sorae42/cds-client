@@ -2,7 +2,9 @@ import { submission } from '$lib/utilities';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params, cookies, url }) => {
+export const load: PageServerLoad = async ({ params, cookies, url, parent }) => {
+    const { user } = await parent();
+
     const result = await submission({
         method: 'GET',
         endpoint: '/subcriteriaassignments/my-evaluation-periods',
@@ -20,6 +22,7 @@ export const load: PageServerLoad = async ({ params, cookies, url }) => {
     }
 
     return {
-        period: period
+        period: period,
+        role: user?.role,
     };
 };

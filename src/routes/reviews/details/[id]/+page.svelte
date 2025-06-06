@@ -116,15 +116,17 @@
 									)}
 								{/if}
 							</div>
-							<a
-								href="/reviews/details/{period.id}/rate?subCriteriaId={subCriteria.id}"
-								class="btn {subCriteria.assignment.score !== null
-									? 'preset-tonal-success'
-									: 'preset-filled-primary-500'}"
-							>
-								<Star class="w-4 h-4" />
-								{subCriteria.assignment.score !== null ? 'Xem lại' : 'Đánh giá'}
-							</a>
+							{#if data.role !== 'admin'}
+								<a
+									href="/reviews/details/{period.id}/rate?subCriteriaId={subCriteria.id}"
+									class="btn {subCriteria.assignment.score !== null
+										? 'preset-tonal-success'
+										: 'preset-filled-primary-500'}"
+								>
+									<Star class="w-4 h-4" />
+									{subCriteria.assignment.score !== null ? 'Xem lại' : 'Đánh giá'}
+								</a>
+							{/if}
 						</div>
 					</div>
 				{/each}
