@@ -115,6 +115,7 @@
 			{/snippet}
 			
 			{#each allReviewers as reviewer, index}
+			{#if !reviewer.isChair}
 				<Accordion.Item
 					value={`reviewer-${reviewer.reviewerId}`}
 					controlClasses="font-bold"
@@ -123,11 +124,6 @@
 					{#snippet control()}
 						<span class="flex justify-between items-center w-full">
 							<span class="flex items-center gap-2">
-								{#if reviewer.isChair}
-									<Crown size={20} class="text-yellow-500" />
-								{:else}
-									<User size={20} class="text-blue-500" />
-								{/if}
 								<span>{reviewer.fullName || reviewer.username}</span>
 								{#if reviewer.isChair}
 									<span class="badge preset-outlined-warning-500">Chủ tịch</span>
@@ -164,6 +160,7 @@
 						</div>
 					{/snippet}
 				</Accordion.Item>
+				{/if}
 			{/each}
 		</Accordion>
 	</div>
