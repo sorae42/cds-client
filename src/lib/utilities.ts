@@ -1,5 +1,5 @@
 import { redirect, type Cookies } from "@sveltejs/kit";
-import { toaster } from "./toaster";
+import { env } from '$env/dynamic/public';
 
 export async function streamJson(stream: ReadableStream<Uint8Array> | null) {
     if (stream == null) return { done: false, data: null };
@@ -106,8 +106,8 @@ export async function submission(dataSubmission: Submission) {
 
     try {
         console.debug(`${dataSubmission.method} ${dataSubmission.endpoint}`);
-
-        const data = await fetch("http://localhost:5157/api" + dataSubmission.endpoint, formData);
+        const endpoint = env.PUBLIC_API_URL || "http://localhost:5157/api";
+        const data = await fetch(endpoint + dataSubmission.endpoint, formData);
         
         if (!data.url.includes("/api/auths") && data.status === 401) {
             dataSubmission.cookies.set("vn.CDS.RedirectTo", dataSubmission.unauthorizedPath || "/", { path: '/' })
